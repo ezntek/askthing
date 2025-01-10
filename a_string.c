@@ -36,7 +36,7 @@ a_string a_string_with_capacity(size_t cap) {
 }
 
 void a_string_free(a_string* s) {
-    if (!a_string_isvalid(s)) {
+    if (a_string_invalid(s)) {
         panic("you donut the string is invalid");
     }
 
@@ -47,7 +47,7 @@ void a_string_free(a_string* s) {
 }
 
 void a_string_reserve(a_string* s, size_t cap) {
-    if (!a_string_isvalid(s)) {
+    if (a_string_invalid(s)) {
         panic("you donut the string is invalid");
     }
 
@@ -71,7 +71,7 @@ a_string a_string_from_cstr(const char* cstr) {
 
 a_string astr(const char* cstr) { return a_string_from_cstr(cstr); }
 
-bool a_string_isvalid(const a_string* s) {
+bool a_string_invalid(const a_string* s) {
     return (s->len == (size_t)-1 || s->cap == (size_t)-1 || s->data == NULL);
 }
 

@@ -36,9 +36,12 @@ a_vector a_vector_from_ints(const int* ints, size_t len) {
 
     for (size_t i = 0; i < len; i++) {
         int* heap_int = calloc(1, sizeof(int));
+        check_alloc(heap_int);
         *heap_int = ints[i];
         res.data[i] = (void*)heap_int;
     }
+
+    res.len = len;
 
     return res;
 }
@@ -51,18 +54,20 @@ void a_vector_free(a_vector* v) {
 
 void a_vector_free_with_items(a_vector* v) {
     for (size_t i = 0; i < v->len; i++) {
-        free(v->data[i]);
+        void* e = *(((*v).data) + i);
+        free(e);
+        eprintf("freed\n");
     }
 
     a_vector_free(v);
 }
 
-bool a_vector_isvalid(a_vector* v) {
+bool a_vector_invalid(a_vector* v) {
     return (v->len == (size_t)-1 || v->cap == (size_t)-1 || v->data == NULL);
 }
 
 void a_vector_reserve(a_vector* v, size_t cap) {
-    if (!a_vector_isvalid(v)) {
+    if (a_vector_invalid(v)) {
         panic("you donut the vector is invalid");
     }
 
@@ -72,25 +77,29 @@ void a_vector_reserve(a_vector* v, size_t cap) {
 }
 
 void a_vector_append(a_vector* v, void* new) {
-    if (!a_vector_isvalid(v)) {
+    if (a_vector_invalid(v)) {
         panic("you donut the vector is invalid");
     }
 
-    if (v->len + 1 < v->cap) {
+    printf("old cap: %zu\nlen: %zu\n", v->cap, v->len);
+
+    if (v->len + 1 > v->cap) {
         a_vector_reserve(v, v->cap * A_VECTOR_GROWTH_FACTOR);
     }
+
+    printf("new cap: %zu\n", v->cap);
 
     v->data[v->len++] = new;
 }
 
 void a_vector_append_list(a_vector* v, const a_vector* other) {
-    if (!a_vector_isvalid(v)) {
+    if (a_vector_invalid(v)) {
         panic("you donut the vector is invalid");
     }
 }
 
 void* a_vector_pop(a_vector* v) {
-    if (!a_vector_isvalid(v)) {
+    if (a_vector_invalid(v)) {
         panic("you donut the vector is invalid");
     }
 
@@ -104,7 +113,7 @@ void* a_vector_pop(a_vector* v) {
 }
 
 void* a_vector_pop_at(a_vector* v, size_t pos) {
-    if (!a_vector_isvalid(v)) {
+    if (a_vector_invalid(v)) {
         panic("you donut the vector is invalid");
     }
 

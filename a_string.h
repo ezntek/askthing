@@ -89,11 +89,11 @@ a_string a_string_from_cstr(const char* cstr);
 a_string astr(const char* cstr);
 
 /**
- * checks if an a_string is still valid.
+ * checks if an a_string is invalid
  *
  * @param s the string to be checked
  */
-bool a_string_isvalid(const a_string* s);
+bool a_string_invalid(const a_string* s);
 
 /**
  * adds 1 character to an a_string

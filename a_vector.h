@@ -78,11 +78,11 @@ void a_vector_free(a_vector* v);
 void a_vector_free_with_items(a_vector* v);
 
 /**
- * checks if the a_vector is still valid.
+ * checks if the a_vector is invalid.
  *
  * @param v the vector
  */
-bool a_vector_isvalid(a_vector* v);
+bool a_vector_invalid(a_vector* v);
 
 /**
  * reserves a specific capacity on an a_vector.
