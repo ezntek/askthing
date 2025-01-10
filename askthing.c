@@ -11,7 +11,19 @@
 
 #include <stdio.h>
 
+#include "a_string.h"
+
 int main(void) {
-    printf("hello, world!");
+    a_string s = astr("hello, world!");
+    printf("%s\n", s.data);
+
+    a_string_append(&s, " good morning");
+    printf("%s\n", s.data);
+
+    printf("%c\n", a_string_pop(&s));
+    a_string_append_char(&s, 'x');
+    printf("%s\n", s.data);
+
+    a_string_free(&s);
     return 0;
 }

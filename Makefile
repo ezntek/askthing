@@ -1,8 +1,8 @@
 CC = cc
 INCLUDE = 
 LIBS = 
-OBJ = askthing.o
-HEADERS = askthing.h
+OBJ = askthing.o question.o a_string.o
+HEADERS = askthing.h question.h a_string.h
 
 RELEASE_CFLAGS = -O2 -Wall -Wextra -pedantic -march=native -flto=auto $(INCLUDE) $(LIBS)
 DEBUG_CFLAGS = -O0 -g -Wall -Wextra -pedantic -fsanitize=address $(INCLUDE) $(LIBS)
@@ -21,8 +21,6 @@ setup: deps settings
 
 settings:
 	test -f settings.h || make defaults
-
-askthing.o: settings.h
 
 deps:
 

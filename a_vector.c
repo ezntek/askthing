@@ -1,0 +1,122 @@
+/*
+ * AskThing: a very cursed question-and-answer engine.
+ *
+ * Copyright (c) Eason Qin, 2025.
+ *
+ * This source code form is licensed under the Mozilla Public License version
+ * 2.0. You may find the full text of the license in the root of the project, or
+ * visit the OSI website for a digital version.
+ *
+ */
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "a_vector.h"
+#include "util.h"
+
+#define A_VECTOR_GROWTH_FACTOR 3
+
+a_vector a_vector_new(void) { return a_vector_with_capacity(5); }
+
+a_vector a_vector_with_capacity(size_t cap) {
+    a_vector res = {.len = 0, .cap = cap};
+
+    res.data = calloc(res.cap, sizeof(void*));
+    check_alloc(res.data);
+
+    return res;
+}
+
+a_vector a_vector_from_ints(const int* ints, size_t len) {
+    a_vector res = a_vector_with_capacity(len);
+
+    for (size_t i = 0; i < len; i++) {
+        int* heap_int = calloc(1, sizeof(int));
+        *heap_int = ints[i];
+        res.data[i] = (void*)heap_int;
+    }
+
+    return res;
+}
+
+void a_vector_free(a_vector* v) {
+    free(v->data);
+    v->len = -1;
+    v->cap = -1;
+}
+
+void a_vector_free_with_items(a_vector* v) {
+    for (size_t i = 0; i < v->len; i++) {
+        free(v->data[i]);
+    }
+
+    a_vector_free(v);
+}
+
+bool a_vector_isvalid(a_vector* v) {
+    return (v->len == (size_t)-1 || v->cap == (size_t)-1 || v->data == NULL);
+}
+
+void a_vector_reserve(a_vector* v, size_t cap) {
+    if (!a_vector_isvalid(v)) {
+        panic("you donut the vector is invalid");
+    }
+
+    v->data = realloc(v->data, sizeof(void*) * cap);
+    check_alloc(v->data);
+    v->cap = cap;
+}
+
+void a_vector_append(a_vector* v, void* new) {
+    if (!a_vector_isvalid(v)) {
+        panic("you donut the vector is invalid");
+    }
+
+    if (v->len + 1 < v->cap) {
+        a_vector_reserve(v, v->cap * A_VECTOR_GROWTH_FACTOR);
+    }
+
+    v->data[v->len++] = new;
+}
+
+void a_vector_append_list(a_vector* v, const a_vector* other) {
+    if (!a_vector_isvalid(v)) {
+        panic("you donut the vector is invalid");
+    }
+}
+
+void* a_vector_pop(a_vector* v) {
+    if (!a_vector_isvalid(v)) {
+        panic("you donut the vector is invalid");
+    }
+
+    void* res = v->data[--v->len];
+
+    if (v->len < (int)(v->cap / A_VECTOR_GROWTH_FACTOR)) {
+        a_vector_reserve(v, (int)(v->cap / A_VECTOR_GROWTH_FACTOR));
+    }
+
+    return res;
+}
+
+void* a_vector_pop_at(a_vector* v, size_t pos) {
+    if (!a_vector_isvalid(v)) {
+        panic("you donut the vector is invalid");
+    }
+
+    if (pos >= v->len || pos < 0) {
+        panic("array index %zu out of range", pos);
+    }
+
+    void* res = v->data[pos--];
+
+    size_t items =
+        (v->len - pos + 1); // items between pos+1 and the end of the list
+    memmove(&v->data[pos], &v->data[pos + 1], items * sizeof(void*));
+
+    return res;
+}

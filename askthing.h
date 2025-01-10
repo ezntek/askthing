@@ -8,3 +8,5 @@
  * visit the OSI website for a digital version.
  *
  */
+
+#pragma once
