@@ -32,17 +32,6 @@ typedef struct {
 } a_string;
 
 /**
- * non-null-terminated reference to an a_string.
- */
-typedef struct {
-    // pointer to the beginning of the slize.
-    const char* data;
-
-    // length of the slice.
-    size_t len;
-} a_string_slice;
-
-/**
  * creates an empty a_string.
  */
 a_string a_string_new(void);
@@ -87,6 +76,14 @@ a_string a_string_from_cstr(const char* cstr);
  * string if it is heap-allocated, the string is instead duplicated.
  */
 a_string astr(const char* cstr);
+
+/**
+ * similar to asprintf, but for an a_string.
+ *
+ * @param format the format
+ * @param ... format args
+ */
+a_string a_string_sprintf(const char* restrict format, ...);
 
 /**
  * checks if an a_string is invalid
@@ -138,3 +135,59 @@ void a_string_append(a_string* s, const char* new);
  * @return the last character
  */
 char a_string_pop(a_string* s);
+
+/**
+ * removes all whitespace characters from the left side of an a_string.
+ *
+ * @param s the string
+ * @return a new a_string.
+ */
+a_string a_string_trim_left(const a_string* s);
+
+/**
+ * removes all whitespace characters from the right side of an a_string.
+ *
+ * @param s the string
+ * @return a new a_string.
+ */
+a_string a_string_trim_right(const a_string* s);
+
+/**
+ * removes all whitespace characters from the left and right sides of an
+ * a_string.
+ *
+ * @param s the string
+ * @return a new a_string.
+ */
+a_string a_string_trim(const a_string* s);
+
+/**
+ * converts all the characters in the a_string to uppercase.
+ *
+ * @param s the string
+ */
+a_string a_string_toupper(const a_string* s);
+
+/**
+ * converts all the characters in the a_string to lowercase.
+ *
+ * @param s the string
+ */
+a_string a_string_tolower(const a_string* s);
+
+/**
+ * checks if 2 a_strings are the same.
+ *
+ * @param lhs the first string
+ * @param rhs the other string
+ */
+bool a_string_equal(const a_string* lhs, const a_string* rhs);
+
+/**
+ * checks if 2 a_strings are the same, case insensitive.
+ *
+ * @param lhs the first string
+ * @param rhs the other string
+ */
+
+bool a_string_equal_case_insensitive(const a_string* lhs, const a_string* rhs);

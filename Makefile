@@ -8,6 +8,8 @@ RELEASE_CFLAGS = -O2 -Wall -Wextra -pedantic -march=native -flto=auto $(INCLUDE)
 DEBUG_CFLAGS = -O0 -g -Wall -Wextra -pedantic -fsanitize=address $(INCLUDE) $(LIBS)
 TARBALLFILES = Makefile LICENSE.md README.md settings.def.h $(OBJ) 
 
+TARGET=debug
+
 ifeq ($(TARGET),debug)
 	CFLAGS=$(DEBUG_CFLAGS)
 else

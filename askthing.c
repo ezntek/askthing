@@ -12,33 +12,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "a_string.h"
 #include "a_vector.h"
+#include "question.h"
 #include "util.h"
 
-void print_vector(a_vector* v) {
-    for (size_t i = 0; i < v->len; i++) {
-        printf("%d, ", *(int*)v->data[i]);
-        fflush(stdout);
-    }
-    printf("\n");
-}
-
-int* make_heap_int(int i) {
-    int* res = malloc(sizeof(int));
-    check_alloc(res);
-    *res = i;
-    return res;
-}
-
 int main(void) {
-    int ints[] = {1, 2, 3, 4, 5, 6, 7, 8};
-    a_vector v = a_vector_from_ints(ints, 8);
-    print_vector(&v);
-
-    a_vector_append(&v, make_heap_int(9));
-    a_vector_append(&v, make_heap_int(10));
-    print_vector(&v);
-
-    a_vector_free_with_items(&v);
-    return 0;
+    Question qn = question_new(astr("is beej hot"), astr("yes"), 3, false);
+    question_ask(&qn, 1);
+    question_destroy(&qn);
+    return 69;
 }

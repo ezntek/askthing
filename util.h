@@ -30,3 +30,14 @@
         eprintf("`\n");                                                        \
         exit(1);                                                               \
     }
+
+#define S_BOLD    "\033[1m"
+#define S_DIM     "\033[2m"
+#define S_END     "\033[0m"
+#define S_RED     "\033[31m"
+#define S_GREEN   "\033[32m"
+#define S_YELLOW  "\033[33m"
+#define S_BLUE    "\033[34m"
+#define S_MAGENTA "\033[35m"
+#define S_CYAN    "\033[36m"
+#define S_WHITE   "\033[37m"

@@ -1,6 +1,4 @@
 /*
- * AskThing: a very cursed question-and-answer engine.
- *
  * Copyright (c) Eason Qin, 2025.
  *
  * This source code form is licensed under the Mozilla Public License version
@@ -56,7 +54,6 @@ void a_vector_free_with_items(a_vector* v) {
     for (size_t i = 0; i < v->len; i++) {
         void* e = *(((*v).data) + i);
         free(e);
-        eprintf("freed\n");
     }
 
     a_vector_free(v);
@@ -81,21 +78,29 @@ void a_vector_append(a_vector* v, void* new) {
         panic("you donut the vector is invalid");
     }
 
-    printf("old cap: %zu\nlen: %zu\n", v->cap, v->len);
-
     if (v->len + 1 > v->cap) {
         a_vector_reserve(v, v->cap * A_VECTOR_GROWTH_FACTOR);
     }
 
-    printf("new cap: %zu\n", v->cap);
-
     v->data[v->len++] = new;
 }
 
-void a_vector_append_list(a_vector* v, const a_vector* other) {
+void a_vector_append_vector(a_vector* v, const a_vector* other) {
     if (a_vector_invalid(v)) {
         panic("you donut the vector is invalid");
     }
+
+    size_t required_len = v->len + other->len;
+    if (required_len > v->cap) {
+        size_t sz = v->cap;
+        while (sz < required_len)
+            sz *= A_VECTOR_GROWTH_FACTOR;
+        a_vector_reserve(v, sz);
+    }
+
+    // copy other->len number of elements into the end of v->data.
+    memcpy(&v->data[v->len], other->data, sizeof(void*) * other->len);
+    v->len += other->len;
 }
 
 void* a_vector_pop(a_vector* v) {

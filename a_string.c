@@ -1,6 +1,4 @@
 /*
- * AskThing: a very cursed question-and-answer engine.
- *
  * Copyright (c) Eason Qin, 2025.
  *
  * This source code form is licensed under the Mozilla Public License version
@@ -8,6 +6,8 @@
  * visit the OSI website for a digital version.
  */
 
+#include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,6 +71,17 @@ a_string a_string_from_cstr(const char* cstr) {
 
 a_string astr(const char* cstr) { return a_string_from_cstr(cstr); }
 
+a_string a_string_sprintf(const char* restrict format, ...) {
+    va_list args;
+    va_start(args, format);
+    char* dest = NULL;
+    vasprintf(&dest, format, args);
+    va_end(args);
+    a_string res = a_string_from_cstr(dest);
+    free(dest);
+    return res;
+}
+
 bool a_string_invalid(const a_string* s) {
     return (s->len == (size_t)-1 || s->cap == (size_t)-1 || s->data == NULL);
 }
@@ -111,4 +122,112 @@ char a_string_pop(a_string* s) {
     char last = s->data[--s->len];
     s->data[s->len] = '\0';
     return last;
+}
+
+a_string a_string_trim_left(const a_string* s) {
+    size_t i = 0;
+    while (i < s->len) { // must check this first, else segfault
+        if (strchr(" \n\t\r", s->data[i])) {
+            i++;
+        } else {
+            break;
+        }
+    }
+
+    return a_string_from_cstr(&s->data[i]);
+}
+
+a_string a_string_trim_right(const a_string* s) {
+    size_t end = s->len - 1;
+    while (end >= 0) {
+        if (strchr(" \n\t\r", s->data[end])) {
+            end--;
+        } else {
+            break;
+        }
+    }
+    end++;
+
+    a_string res = a_string_with_capacity(end + 1);
+    for (size_t i = 0; i < end; i++) {
+        res.data[i] = s->data[i];
+    }
+
+    return res;
+}
+
+a_string a_string_trim(const a_string* s) {
+    size_t begin = 0;
+    size_t end = s->len - 1;
+
+    while (begin < s->len) { // must check this first, else segfault
+        if (strchr(" \n\t\r", s->data[begin]) != NULL) {
+            begin++;
+        } else {
+            break;
+        }
+    }
+
+    while (end >= 0) {
+        if (strchr(" \n\t\r", s->data[end]) != NULL) {
+            end--;
+        } else {
+            break;
+        }
+    }
+    end++;
+
+    a_string res = a_string_with_capacity(end - begin + 1);
+    res.len = end - begin;
+
+    size_t i = 0;
+    for (size_t j = begin; j < end; j++) {
+        res.data[i++] = s->data[j];
+    }
+
+    return res;
+}
+
+a_string a_string_toupper(const a_string* s) {
+    a_string res = a_string_with_capacity(s->cap);
+    for (size_t i = 0; i < s->len; i++) {
+        res.data[i] = toupper(s->data[i]);
+    }
+    return res;
+}
+
+a_string a_string_tolower(const a_string* s) {
+    a_string res = a_string_with_capacity(s->cap);
+    for (size_t i = 0; i < s->len; i++) {
+        res.data[i] = tolower(s->data[i]);
+    }
+    return res;
+}
+
+bool a_string_equal(const a_string* lhs, const a_string* rhs) {
+    if (lhs->len != rhs->len) {
+        return false;
+    }
+
+    for (size_t i = 0; i < lhs->len; i++) {
+        if (lhs->data[i] != rhs->data[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool a_string_equal_case_insensitive(const a_string* lhs, const a_string* rhs) {
+    if (lhs->len != rhs->len) {
+        return false;
+    }
+
+    for (size_t i = 0; i < lhs->len; i++) {
+        if (tolower(lhs->data[i]) != tolower(rhs->data[i])) {
+            return false;
+        }
+    }
+
+    return true;
 }

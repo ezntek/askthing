@@ -13,6 +13,7 @@
 #include <stdbool.h>
 
 #include "a_string.h"
+#include "a_vector.h"
 
 typedef struct {
     a_string prompt;
@@ -22,11 +23,12 @@ typedef struct {
 } Question;
 
 typedef struct {
-
+    a_vector questions; // a_vector of Question
 } QuestionGroup;
 
 Question question_new(a_string prompt, a_string answer, int reward,
                       bool case_sensitive);
 Question question_new_empty(void); // create an empty question
 void question_destroy(Question* q);
-void question_ask(Question* q);
+int question_ask(const Question* q,
+                 int index); // negative index: no index, return: reward
