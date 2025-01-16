@@ -21,6 +21,11 @@ int main(void) {
     QuestionGroup qg = questiongroup_empty();
     questiongroup_open_file(&qg, "questions.txt");
     questiongroup_parse_file(&qg);
+
+    for (size_t i = 0; i < qg.questions.len; i++) {
+        question_ask((Question*)qg.questions.data[i], i + 1);
+    }
+
     questiongroup_destroy(&qg);
-    return 69;
+    return 0;
 }

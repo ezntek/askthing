@@ -9,7 +9,6 @@
  *
  */
 
-#include <bits/posix2_lim.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -60,12 +59,13 @@ int question_ask(const Question* q, int index) {
     snprintf(buf, sizeof(buf), S_BLUE "\n    (?) " S_END S_DIM);
     a_string_append(&res, buf);
 
-    printf("%s", res.data);
+    printf("%s" S_END, res.data);
     fflush(stdout);
 
     int scanf_result = 0;
     while (scanf_result == 0) {
         scanf_result = scanf("%[^\n]", buf);
+        getchar(); // consume newline
         if (scanf_result == 0) {
             while (getchar() != '\n')
                 continue;
@@ -83,19 +83,20 @@ int question_ask(const Question* q, int index) {
     a_string_free(&raw_answer);
 
     bool cond;
+
     if (!q->case_sensitive) {
         cond = a_string_equal_case_insensitive(&answer, &q->answer);
     } else {
         cond = a_string_equal(&answer, &q->answer);
     }
 
-    if (!cond) {
-        printf(S_BOLD S_RED "    Incorrect!\n" S_END);
-        printf("You get a " S_BOLD S_RED "no" S_END " reward.\n");
-    } else {
+    if (cond) {
         printf(S_BOLD S_GREEN "    Correct!\n" S_END);
         printf("You get a " S_BOLD S_GREEN "%d" S_END " point reward.\n",
                q->reward);
+    } else {
+        printf(S_BOLD S_RED "    Incorrect!\n" S_END);
+        printf("You get a " S_BOLD S_RED "no" S_END " reward.\n");
     }
 
     a_string_free(&res);
@@ -116,7 +117,12 @@ QuestionGroup questiongroup_empty(void) {
     };
 }
 
-void questiongroup_add_question(Question q); // will be slapped on the heap
+void questiongroup_add_question(QuestionGroup* g, Question q) {
+    Question* heapqn = calloc(1, sizeof(Question));
+    check_alloc(heapqn);
+    *heapqn = q;
+    a_vector_append(&g->questions, (void*)heapqn);
+}
 
 void questiongroup_open_file(QuestionGroup* g, const char* filename) {
     if (strlen(filename) + 1 > g->filename.cap) {
@@ -164,11 +170,12 @@ void questiongroup_parse_file(QuestionGroup* g) {
             panic("whoopsies theres some error in the file");
         }
 
-        eprintf("`%s` `%s` `%d` `%c`\n", question.data, answer.data, reward,
-                yn);
+        question.len = strlen(question.data);
+        answer.len = strlen(answer.data);
 
-        a_string_free(&question);
-        a_string_free(&answer);
+        Question qn = question_new(question, answer, reward, (yn == 'y'));
+        questiongroup_add_question(g, qn);
+
         a_string_free(&trimmed);
     }
 
@@ -178,6 +185,7 @@ void questiongroup_parse_file(QuestionGroup* g) {
 void questiongroup_destroy(QuestionGroup* g) {
     for (size_t i = 0; i < g->questions.len; i++) {
         question_destroy((Question*)g->questions.data[i]);
+        free(g->questions.data[i]);
     }
     a_vector_free(&g->questions);
     a_string_free(&g->filename);

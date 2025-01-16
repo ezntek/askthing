@@ -40,7 +40,8 @@ int question_ask(const Question* q,
 
 QuestionGroup questiongroup_new(const char* filename);
 QuestionGroup questiongroup_empty(void);
-void questiongroup_add_question(Question q); // will be slapped on the heap
+void questiongroup_add_question(QuestionGroup* g,
+                                Question q); // will be slapped on the heap
 void questiongroup_open_file(QuestionGroup* g, const char* filename);
 void questiongroup_parse_file(
     QuestionGroup*

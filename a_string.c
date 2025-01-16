@@ -89,7 +89,7 @@ a_string a_string_from_cstr(const char* cstr) {
 
 a_string astr(const char* cstr) { return a_string_from_cstr(cstr); }
 
-a_string a_string_strdup(const a_string* s) {
+a_string a_string_duplicate(const a_string* s) {
     a_string res = a_string_with_capacity(s->cap);
     res.len = s->len;
     strncpy(res.data, s->data, s->len);

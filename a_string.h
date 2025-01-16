@@ -108,7 +108,7 @@ a_string astr(const char* cstr);
  *
  * @param s the string to duplicate
  */
-a_string a_string_strdup(const a_string* s);
+a_string a_string_duplicate(const a_string* s);
 
 /**
  * similar to asprintf, but for an a_string.
