@@ -193,6 +193,9 @@ a_string a_string_trim(const a_string* s) {
         }
     }
 
+    if (end == s->len)
+        end--;
+
     while (end >= 0) {
         if (strchr(" \n\t\r", s->data[end]) != NULL) {
             end--;
@@ -227,6 +230,19 @@ a_string a_string_tolower(const a_string* s) {
         res.data[i] = tolower(s->data[i]);
     }
     return res;
+}
+
+void a_string_inplace_toupper(a_string* s) {
+    a_string res = a_string_with_capacity(s->cap);
+    for (size_t i = 0; i < s->len; i++) {
+        s->data[i] = tolower(s->data[i]);
+    }
+}
+
+void a_string_inplace_tolower(a_string* s) {
+    for (size_t i = 0; i < s->len; i++) {
+        s->data[i] = tolower(s->data[i]);
+    }
 }
 
 bool a_string_equal(const a_string* lhs, const a_string* rhs) {

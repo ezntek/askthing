@@ -209,6 +209,20 @@ a_string a_string_toupper(const a_string* s);
 a_string a_string_tolower(const a_string* s);
 
 /**
+ * (IN PLACE) converts all the characters in the a_string to uppercase.
+ *
+ * @param s the string
+ */
+void a_string_inplace_toupper(a_string* s);
+
+/**
+ * (IN PLACE) converts all the characters in the a_string to lowercase.
+ *
+ * @param s the string
+ */
+void a_string_inplace_tolower(a_string* s);
+
+/**
  * checks if 2 a_strings are the same.
  *
  * @param lhs the first string

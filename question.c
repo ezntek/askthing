@@ -133,13 +133,46 @@ void questiongroup_parse_file(QuestionGroup* g) {
 
     char* fgets_rv;
     const size_t linecap = 250;
-    a_string s = a_string_with_capacity(linecap);
+    a_string line = a_string_with_capacity(linecap);
 
-    while ((fgets_rv = fgets(s.data, linecap, g->fp)) != NULL) {
-        printf("read: %s\n", s.data);
+    while ((fgets_rv = fgets(line.data, linecap, g->fp)) != NULL) {
+        // hacky aah
+        line.len = strlen(line.data);
+
+        if (line.len <= 1) {
+            continue; // ignore empty lines
+        }
+
+        a_string trimmed = a_string_trim(&line);
+
+        if (trimmed.data[0] == '/' && trimmed.data[1] == '/') {
+            // comment
+            a_string_free(&trimmed);
+            continue;
+        }
+
+        // handle the csv
+        a_string question = a_string_with_capacity(70);
+        a_string answer = a_string_with_capacity(70);
+        int reward = 0;
+        char yn = 0; // why cant i scanf with %c lol
+
+        int scanf_result = sscanf(trimmed.data, "%[^;];%[^;];%d;%c[yn]",
+                                  question.data, answer.data, &reward, &yn);
+
+        if (scanf_result < 4) {
+            panic("whoopsies theres some error in the file");
+        }
+
+        eprintf("`%s` `%s` `%d` `%c`\n", question.data, answer.data, reward,
+                yn);
+
+        a_string_free(&question);
+        a_string_free(&answer);
+        a_string_free(&trimmed);
     }
 
-    a_string_free(&s);
+    a_string_free(&line);
 }
 
 void questiongroup_destroy(QuestionGroup* g) {
