@@ -24,6 +24,7 @@ typedef struct {
 } Question;
 
 typedef struct {
+    a_string name;
     a_vector questions; // a_vector of Question
     a_string filename;
     int total_score;

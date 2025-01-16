@@ -1,5 +1,6 @@
-// this is a comment
-
 // question;answer;reward;case sensitivity [y/n]
-are apples red?;yes;2;n
+
+erroneous line
+are apples red?;yes;2;y
 is beej hot?;definitely;2;n
+is guyfrom a meow?;you are stupid;100;n

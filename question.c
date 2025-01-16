@@ -45,7 +45,7 @@ int question_ask(const Question* q, int index) {
         res = a_string_new();
     }
 
-    char pts[10];
+    char pts[30];
     if (q->reward == 1) {
         snprintf(pts, sizeof(pts), "1 point");
     } else {
@@ -110,6 +110,7 @@ QuestionGroup questiongroup_new(const char* filename) {
 
 QuestionGroup questiongroup_empty(void) {
     return (QuestionGroup){
+        .name = astr("Untitled Set"),
         .questions = a_vector_new(),
         .filename = a_string_new(),
         .total_score = 0,
@@ -131,7 +132,15 @@ void questiongroup_open_file(QuestionGroup* g, const char* filename) {
 
     strcpy(g->filename.data, filename);
 
-    g->fp = fopen(g->filename.data, "r");
+    if (g->write) {
+        g->fp = fopen(g->filename.data, "r+");
+    } else {
+        g->fp = fopen(g->filename.data, "r");
+    }
+
+    if (g->fp == NULL) {
+        panic("file doesn't exist");
+    }
 }
 
 void questiongroup_parse_file(QuestionGroup* g) {
@@ -153,11 +162,17 @@ void questiongroup_parse_file(QuestionGroup* g) {
 
         if (trimmed.data[0] == '/' && trimmed.data[1] == '/') {
             // comment
-            a_string_free(&trimmed);
-            continue;
+            goto loopend;
         }
 
-        // handle the csv
+        // handle the csv part
+        //
+        // make sure no semicolons are in the name
+        if (g->questions.len < 1 && strchr(trimmed.data, ';') == NULL) {
+            a_string_copy(&g->name, &trimmed);
+            goto loopend;
+        }
+
         a_string question = a_string_with_capacity(70);
         a_string answer = a_string_with_capacity(70);
         int reward = 0;
@@ -176,6 +191,7 @@ void questiongroup_parse_file(QuestionGroup* g) {
         Question qn = question_new(question, answer, reward, (yn == 'y'));
         questiongroup_add_question(g, qn);
 
+    loopend:
         a_string_free(&trimmed);
     }
 
@@ -187,8 +203,22 @@ void questiongroup_destroy(QuestionGroup* g) {
         question_destroy((Question*)g->questions.data[i]);
         free(g->questions.data[i]);
     }
+    a_string_free(&g->name);
     a_vector_free(&g->questions);
     a_string_free(&g->filename);
     fclose(g->fp);
 }
-void questiongroup_ask(QuestionGroup* g);
+void questiongroup_ask(QuestionGroup* g) {
+    printf(S_BOLD "%s\n" S_END, g->name.data);
+    printf(S_DIM "============\n\n" S_END);
+
+    int total = 0;
+    for (size_t i = 0; i < g->questions.len; i++) {
+        total += question_ask((Question*)g->questions.data[i], i + 1);
+    }
+
+    printf(S_DIM "\n============\n" S_END);
+    printf("congratulations! you got " S_GREEN S_BOLD "%d" S_END
+           " points in total.\n",
+           total);
+}

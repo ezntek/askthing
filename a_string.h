@@ -67,6 +67,14 @@ void a_string_free(a_string* s);
 void a_string_copy(a_string* dest, const a_string* src);
 
 /**
+ * Copies the entirety of a C string into an a_string.
+ *
+ * @param dest the dest string
+ * @param src the source string
+ */
+void a_string_copy_cstr(a_string* dest, const char* src);
+
+/**
  * Copies N bytes of one a_string to another.
  *
  * @param dest the dest string
