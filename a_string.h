@@ -44,12 +44,36 @@ a_string a_string_new(void);
 a_string a_string_with_capacity(size_t cap);
 
 /**
+ * clears the string with null terminators, keeping the capacity.
+ *
+ * @param s the string
+ */
+void a_string_clear(a_string* s);
+
+/**
  * destroys the heap-allocated data in an a_string. Do not read from the
  * a_string after it is destroyed!
  *
  * @param s the string to be destroyed
  */
 void a_string_free(a_string* s);
+
+/**
+ * Copies one a_string to another.
+ *
+ * @param dest the dest string
+ * @param src the source string
+ */
+void a_string_copy(a_string* dest, const a_string* src);
+
+/**
+ * Copies N bytes of one a_string to another.
+ *
+ * @param dest the dest string
+ * @param src the source string
+ * @param chars the number of chars
+ */
+void a_string_ncopy(a_string* dest, const a_string* src, size_t chars);
 
 /**
  * reserves a specific capacity on an a_string.
@@ -76,6 +100,15 @@ a_string a_string_from_cstr(const char* cstr);
  * string if it is heap-allocated, the string is instead duplicated.
  */
 a_string astr(const char* cstr);
+
+/**
+ * duplicates an a_string.
+ *
+ * the exact string, including the capacity it holds will be duplicated.
+ *
+ * @param s the string to duplicate
+ */
+a_string a_string_strdup(const a_string* s);
 
 /**
  * similar to asprintf, but for an a_string.

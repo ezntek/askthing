@@ -30,17 +30,6 @@ typedef struct {
 } a_vector;
 
 /**
- * a non-null-terminated slice of an a_vector.
- */
-typedef struct {
-    // the raw data.
-    const void** data;
-
-    // length of the slice.
-    size_t len;
-} a_slice;
-
-/**
  * creates an empty a_vector.
  */
 

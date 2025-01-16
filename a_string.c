@@ -35,6 +35,8 @@ a_string a_string_with_capacity(size_t cap) {
     return res;
 }
 
+void a_string_clear(a_string* s) { memset(s->data, '\0', s->cap); }
+
 void a_string_free(a_string* s) {
     if (a_string_invalid(s)) {
         panic("you donut the string is invalid");
@@ -44,6 +46,22 @@ void a_string_free(a_string* s) {
 
     s->len = -1;
     s->cap = -1;
+}
+
+void a_string_copy(a_string* dest, const a_string* src) {
+    if (src->len > dest->cap) {
+        a_string_reserve(dest, dest->cap);
+    }
+
+    strncpy(dest->data, src->data, src->len);
+}
+
+void a_string_ncopy(a_string* dest, const a_string* src, size_t chars) {
+    if (chars > dest->cap) {
+        a_string_reserve(dest, chars);
+    }
+
+    strncpy(dest->data, src->data, chars);
 }
 
 void a_string_reserve(a_string* s, size_t cap) {
@@ -70,6 +88,13 @@ a_string a_string_from_cstr(const char* cstr) {
 }
 
 a_string astr(const char* cstr) { return a_string_from_cstr(cstr); }
+
+a_string a_string_strdup(const a_string* s) {
+    a_string res = a_string_with_capacity(s->cap);
+    res.len = s->len;
+    strncpy(res.data, s->data, s->len);
+    return res;
+}
 
 a_string a_string_sprintf(const char* restrict format, ...) {
     va_list args;

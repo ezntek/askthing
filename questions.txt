@@ -1,0 +1,5 @@
+// this is a comment
+
+// question;answer;reward;case sensitivity [y/n]
+are apples red?;yes;2;n
+is beej hot?;definitely;2;n

@@ -9,11 +9,13 @@
  *
  */
 
+#include <bits/posix2_lim.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "a_string.h"
+#include "a_vector.h"
 #include "question.h"
 #include "util.h"
 
@@ -100,3 +102,52 @@ int question_ask(const Question* q, int index) {
     a_string_free(&answer);
     return q->reward;
 }
+
+QuestionGroup questiongroup_new(const char* filename) {
+    panic("not implemented");
+}
+
+QuestionGroup questiongroup_empty(void) {
+    return (QuestionGroup){
+        .questions = a_vector_new(),
+        .filename = a_string_new(),
+        .total_score = 0,
+        .fp = NULL,
+    };
+}
+
+void questiongroup_add_question(Question q); // will be slapped on the heap
+
+void questiongroup_open_file(QuestionGroup* g, const char* filename) {
+    if (strlen(filename) + 1 > g->filename.cap) {
+        a_string_reserve(&g->filename, strlen(filename) + 1);
+    }
+
+    strcpy(g->filename.data, filename);
+
+    g->fp = fopen(g->filename.data, "r");
+}
+
+void questiongroup_parse_file(QuestionGroup* g) {
+    // get the line
+
+    char* fgets_rv;
+    const size_t linecap = 250;
+    a_string s = a_string_with_capacity(linecap);
+
+    while ((fgets_rv = fgets(s.data, linecap, g->fp)) != NULL) {
+        printf("read: %s\n", s.data);
+    }
+
+    a_string_free(&s);
+}
+
+void questiongroup_destroy(QuestionGroup* g) {
+    for (size_t i = 0; i < g->questions.len; i++) {
+        question_destroy((Question*)g->questions.data[i]);
+    }
+    a_vector_free(&g->questions);
+    a_string_free(&g->filename);
+    fclose(g->fp);
+}
+void questiongroup_ask(QuestionGroup* g);

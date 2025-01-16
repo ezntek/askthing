@@ -18,8 +18,9 @@
 #include "util.h"
 
 int main(void) {
-    Question qn = question_new(astr("is beej hot"), astr("yes"), 3, false);
-    question_ask(&qn, 1);
-    question_destroy(&qn);
+    QuestionGroup qg = questiongroup_empty();
+    questiongroup_open_file(&qg, "questions.txt");
+    questiongroup_parse_file(&qg);
+    questiongroup_destroy(&qg);
     return 69;
 }
