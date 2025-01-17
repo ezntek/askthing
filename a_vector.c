@@ -65,7 +65,7 @@ bool a_vector_invalid(a_vector* v) {
 
 void a_vector_reserve(a_vector* v, size_t cap) {
     if (a_vector_invalid(v)) {
-        panic("you donut the vector is invalid");
+        panic("the vector is invalid");
     }
 
     v->data = realloc(v->data, sizeof(void*) * cap);
@@ -75,7 +75,7 @@ void a_vector_reserve(a_vector* v, size_t cap) {
 
 void a_vector_append(a_vector* v, void* new) {
     if (a_vector_invalid(v)) {
-        panic("you donut the vector is invalid");
+        panic("the vector is invalid");
     }
 
     if (v->len + 1 > v->cap) {
@@ -87,7 +87,7 @@ void a_vector_append(a_vector* v, void* new) {
 
 void a_vector_append_vector(a_vector* v, const a_vector* other) {
     if (a_vector_invalid(v)) {
-        panic("you donut the vector is invalid");
+        panic("the vector is invalid");
     }
 
     size_t required_len = v->len + other->len;
@@ -105,7 +105,7 @@ void a_vector_append_vector(a_vector* v, const a_vector* other) {
 
 void* a_vector_pop(a_vector* v) {
     if (a_vector_invalid(v)) {
-        panic("you donut the vector is invalid");
+        panic("the vector is invalid");
     }
 
     void* res = v->data[--v->len];
@@ -119,7 +119,7 @@ void* a_vector_pop(a_vector* v) {
 
 void* a_vector_pop_at(a_vector* v, size_t pos) {
     if (a_vector_invalid(v)) {
-        panic("you donut the vector is invalid");
+        panic("the vector is invalid");
     }
 
     if (pos >= v->len) {

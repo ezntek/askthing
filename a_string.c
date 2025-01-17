@@ -39,7 +39,7 @@ void a_string_clear(a_string* s) { memset(s->data, '\0', s->cap); }
 
 void a_string_free(a_string* s) {
     if (a_string_invalid(s)) {
-        panic("you donut the string is invalid");
+        panic("the string is invalid");
     }
 
     free(s->data);
@@ -78,7 +78,7 @@ void a_string_ncopy(a_string* dest, const a_string* src, size_t chars) {
 
 void a_string_reserve(a_string* s, size_t cap) {
     if (a_string_invalid(s)) {
-        panic("you donut the string is invalid");
+        panic("the string is invalid");
     }
 
     s->data = realloc(s->data, cap);
