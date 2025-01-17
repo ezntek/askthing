@@ -238,11 +238,9 @@ a_string a_string_tolower(const a_string* s) {
 }
 
 void a_string_inplace_toupper(a_string* s) {
-    a_string res = a_string_with_capacity(s->cap);
     for (size_t i = 0; i < s->len; i++) {
-        s->data[i] = tolower(s->data[i]);
+        s->data[i] = toupper(s->data[i]);
     }
-    *s = res;
 }
 
 void a_string_inplace_tolower(a_string* s) {

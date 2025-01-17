@@ -42,13 +42,26 @@
         exit(1);                                                               \
     }
 
-#define fatal(...)                                                             \
+#define fatal_noexit(...)                                                      \
     {                                                                          \
         eprintf(S_RED S_BOLD "[fatal] " S_END);                                \
         eprintf(S_DIM);                                                        \
         eprintf(__VA_ARGS__);                                                  \
         eprintf(S_END "\n");                                                   \
+    }
+
+#define fatal(...)                                                             \
+    {                                                                          \
+        fatal_noexit(__VA_ARGS__);                                             \
         exit(1);                                                               \
+    }
+
+#define warn(...)                                                              \
+    {                                                                          \
+        eprintf(S_MAGENTA S_BOLD "[warn] " S_END);                             \
+        eprintf(S_DIM);                                                        \
+        eprintf(__VA_ARGS__);                                                  \
+        eprintf(S_END "\n");                                                   \
     }
 
 #define info(...)                                                              \

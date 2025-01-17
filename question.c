@@ -184,14 +184,29 @@ void questiongroup_parse_file(QuestionGroup* g) {
 
         a_string question = a_string_with_capacity(70);
         a_string answer = a_string_with_capacity(70);
-        int reward = 0;
-        char yn = 0; // why cant i scanf with %c lol
+        int reward = -1;
+        char yn = 'y'; // why cant i scanf with %c lol
 
         int scanf_result = sscanf(trimmed.data, "%[^;];%[^;];%d;%c[yn]",
                                   question.data, answer.data, &reward, &yn);
 
         if (scanf_result < 4) {
-            panic("whoopsies theres some error in the file");
+            fatal_noexit("required fields not found in line `%s`",
+                         trimmed.data);
+
+            if (strlen(question.data) == 0) {
+                warn("question field not found");
+            }
+
+            if (strlen(answer.data) == 0) {
+                warn("answer field not found");
+            }
+
+            if (reward == -1) {
+                warn("reward field not found");
+            }
+
+            exit(1);
         }
 
         question.len = strlen(question.data);
