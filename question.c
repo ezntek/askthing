@@ -109,7 +109,10 @@ int question_ask(const Question* q, int index) {
 }
 
 QuestionGroup questiongroup_new(const char* filename) {
-    panic("not implemented");
+    QuestionGroup res = questiongroup_empty();
+    questiongroup_open_file(&res, filename);
+    questiongroup_parse_file(&res);
+    return res;
 }
 
 QuestionGroup questiongroup_empty(void) {

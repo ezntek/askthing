@@ -28,18 +28,15 @@ int main(int argc, char** argv) {
     } else {
         printf("enter questions filename: ");
         fflush(stdout);
-        filename = a_string_with_capacity(100);
-        fgets(filename.data, 100, stdin);
-        filename.len = strlen(filename.data);
-        filename.data[--filename.len] = '\0';
+        a_string rawfn = a_string_with_capacity(100);
+        fgets(rawfn.data, 100, stdin);
+        rawfn.len = strlen(rawfn.data);
+        filename = a_string_trim(&rawfn);
+        a_string_free(&rawfn);
     }
 
-    QuestionGroup g = questiongroup_empty();
-    questiongroup_open_file(&g, filename.data);
-    questiongroup_parse_file(&g);
+    QuestionGroup g = questiongroup_new(filename.data);
     questiongroup_ask(&g);
-
-quit:
     questiongroup_destroy(&g);
     a_string_free(&filename);
     return 0;

@@ -176,12 +176,8 @@ a_string a_string_trim_left(const a_string* s) {
 
 a_string a_string_trim_right(const a_string* s) {
     size_t end = s->len - 1;
-    while (end >= 0) {
-        if (strchr(" \n\t\r", s->data[end])) {
-            end--;
-        } else {
-            break;
-        }
+    while (strchr(" \n\t\r", s->data[end])) { // end >= 0 is always true
+        end--;
     }
     end++;
 
@@ -208,13 +204,10 @@ a_string a_string_trim(const a_string* s) {
     if (end == s->len)
         end--;
 
-    while (end >= 0) {
-        if (strchr(" \n\t\r", s->data[end]) != NULL) {
-            end--;
-        } else {
-            break;
-        }
+    while (strchr(" \n\t\r", s->data[end])) { // end >= 0 is always true
+        end--;
     }
+
     end++;
 
     a_string res = a_string_with_capacity(end - begin + 1);
@@ -249,6 +242,7 @@ void a_string_inplace_toupper(a_string* s) {
     for (size_t i = 0; i < s->len; i++) {
         s->data[i] = tolower(s->data[i]);
     }
+    *s = res;
 }
 
 void a_string_inplace_tolower(a_string* s) {

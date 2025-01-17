@@ -110,7 +110,7 @@ void* a_vector_pop(a_vector* v) {
 
     void* res = v->data[--v->len];
 
-    if (v->len < (int)(v->cap / A_VECTOR_GROWTH_FACTOR)) {
+    if (v->len < (size_t)(v->cap / A_VECTOR_GROWTH_FACTOR)) {
         a_vector_reserve(v, (int)(v->cap / A_VECTOR_GROWTH_FACTOR));
     }
 
@@ -122,7 +122,7 @@ void* a_vector_pop_at(a_vector* v, size_t pos) {
         panic("you donut the vector is invalid");
     }
 
-    if (pos >= v->len || pos < 0) {
+    if (pos >= v->len) {
         panic("array index %zu out of range", pos);
     }
 
