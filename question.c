@@ -143,8 +143,10 @@ void questiongroup_open_file(QuestionGroup* g, const char* filename) {
     }
 
     if (g->fp == NULL) {
-        panic("file doesn't exist");
+        fatal("file doesn't exist");
     }
+
+    info(S_DIM "loaded file at path `%s`." S_END, g->filename.data);
 }
 
 void questiongroup_parse_file(QuestionGroup* g) {
@@ -214,15 +216,17 @@ void questiongroup_destroy(QuestionGroup* g) {
 }
 
 void questiongroup_ask(QuestionGroup* g) {
+    printf(S_DIM "------------\n" S_END);
     printf(S_BOLD "%s\n" S_END, g->name.data);
-    printf(S_DIM "============\n\n" S_END);
+    printf(S_DIM "------------\n\n" S_END);
 
     int total = 0;
     for (size_t i = 0; i < g->questions.len; i++) {
         total += question_ask((Question*)g->questions.data[i], i + 1);
+        printf("\n");
     }
 
-    printf(S_DIM "\n============\n" S_END);
+    printf(S_DIM "------------\n" S_END);
     printf("congratulations! you got " S_GREEN S_BOLD "%d" S_END
            " points in total.\n",
            total);

@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
         filename = a_string_with_capacity(100);
         fgets(filename.data, 100, stdin);
         filename.len = strlen(filename.data);
+        filename.data[--filename.len] = '\0';
     }
 
     QuestionGroup g = questiongroup_empty();

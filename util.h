@@ -11,6 +11,17 @@
 
 #pragma once
 
+#define S_BOLD    "\033[1m"
+#define S_DIM     "\033[2m"
+#define S_END     "\033[0m"
+#define S_RED     "\033[31m"
+#define S_GREEN   "\033[32m"
+#define S_YELLOW  "\033[33m"
+#define S_BLUE    "\033[34m"
+#define S_MAGENTA "\033[35m"
+#define S_CYAN    "\033[36m"
+#define S_WHITE   "\033[37m"
+
 #define check_alloc(ptr)                                                       \
                                                                                \
     if (ptr == NULL) {                                                         \
@@ -27,17 +38,23 @@
                 "`",                                                           \
                 __LINE__, __func__, __FILE__);                                 \
         eprintf(__VA_ARGS__);                                                  \
-        eprintf("`\n");                                                        \
+        eprintf("`\nplease report this to the developer.\n");                  \
         exit(1);                                                               \
     }
 
-#define S_BOLD    "\033[1m"
-#define S_DIM     "\033[2m"
-#define S_END     "\033[0m"
-#define S_RED     "\033[31m"
-#define S_GREEN   "\033[32m"
-#define S_YELLOW  "\033[33m"
-#define S_BLUE    "\033[34m"
-#define S_MAGENTA "\033[35m"
-#define S_CYAN    "\033[36m"
-#define S_WHITE   "\033[37m"
+#define fatal(...)                                                             \
+    {                                                                          \
+        eprintf(S_RED S_BOLD "[fatal] " S_END);                                \
+        eprintf(S_DIM);                                                        \
+        eprintf(__VA_ARGS__);                                                  \
+        eprintf(S_END "\n");                                                   \
+        exit(1);                                                               \
+    }
+
+#define info(...)                                                              \
+    {                                                                          \
+        eprintf(S_CYAN S_BOLD "[info] " S_END);                                \
+        eprintf(S_DIM);                                                        \
+        eprintf(__VA_ARGS__);                                                  \
+        eprintf(S_END "\n");                                                   \
+    }
