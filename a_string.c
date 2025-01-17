@@ -53,7 +53,8 @@ void a_string_copy(a_string* dest, const a_string* src) {
         a_string_reserve(dest, src->cap);
     }
 
-    strncpy(dest->data, src->data, src->len);
+    strcpy(dest->data, src->data);
+    dest->len = strlen(src->data);
 }
 
 void a_string_copy_cstr(a_string* dest, const char* src) {
@@ -63,6 +64,7 @@ void a_string_copy_cstr(a_string* dest, const char* src) {
     }
 
     strncpy(dest->data, src, len);
+    dest->len = len;
 }
 
 void a_string_ncopy(a_string* dest, const a_string* src, size_t chars) {
@@ -71,6 +73,7 @@ void a_string_ncopy(a_string* dest, const a_string* src, size_t chars) {
     }
 
     strncpy(dest->data, src->data, chars);
+    dest->len = chars;
 }
 
 void a_string_reserve(a_string* s, size_t cap) {

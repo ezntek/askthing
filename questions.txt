@@ -1,6 +1,7 @@
 // question;answer;reward;case sensitivity [y/n]
 
-erroneous line
+my set
+
 are apples red?;yes;2;y
 is beej hot?;definitely;2;n
 is guyfrom a meow?;you are stupid;100;n

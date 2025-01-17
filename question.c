@@ -90,18 +90,22 @@ int question_ask(const Question* q, int index) {
         cond = a_string_equal(&answer, &q->answer);
     }
 
+    int reward;
     if (cond) {
         printf(S_BOLD S_GREEN "    Correct!\n" S_END);
         printf("You get a " S_BOLD S_GREEN "%d" S_END " point reward.\n",
                q->reward);
+        reward = q->reward;
     } else {
         printf(S_BOLD S_RED "    Incorrect!\n" S_END);
         printf("You get a " S_BOLD S_RED "no" S_END " reward.\n");
+        reward = 0;
     }
 
     a_string_free(&res);
     a_string_free(&answer);
-    return q->reward;
+
+    return reward;
 }
 
 QuestionGroup questiongroup_new(const char* filename) {
@@ -208,6 +212,7 @@ void questiongroup_destroy(QuestionGroup* g) {
     a_string_free(&g->filename);
     fclose(g->fp);
 }
+
 void questiongroup_ask(QuestionGroup* g) {
     printf(S_BOLD "%s\n" S_END, g->name.data);
     printf(S_DIM "============\n\n" S_END);
