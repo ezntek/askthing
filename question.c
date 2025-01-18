@@ -18,18 +18,46 @@
 #include "question.h"
 #include "util.h"
 
-Question question_new(a_string prompt, a_string answer, int reward,
+Question question_new(a_string prompt, a_string answers, int reward,
                       bool case_sensitive) {
-    return (Question){prompt, answer, reward, case_sensitive};
+    Question res = (Question){.prompt = prompt,
+                              .answers = a_vector_new(),
+                              .reward = reward,
+                              .case_sensitive = case_sensitive};
+    question_split_answers_to_vector(&res, answers.data);
+    a_string_free(&answers);
+    return res;
 }
 
 Question question_new_empty(void) {
-    return (Question){a_string_new(), a_string_new(), 0, true};
+    return (Question){a_string_new(), a_vector_new(), 0, true};
 }
 
 void question_destroy(Question* q) {
-    a_string_free(&q->answer);
+    for (size_t i = 0; i < q->answers.len; i++) {
+        a_string_free((a_string*)q->answers.data[i]);
+        free((void*)q->answers
+                 .data[i]); // free the heap memory used by the string too
+    }
+
+    a_vector_free(&q->answers);
     a_string_free(&q->prompt);
+}
+
+void question_split_answers_to_vector(Question* q, const char* answers) {
+    char* a = strdup(answers);
+    char* token = strtok(a, ",");
+
+    while (token != NULL) {
+        a_string answer = astr(token);
+        a_string* answer_heap = calloc(1, sizeof(a_string));
+        check_alloc(answer_heap);
+        *answer_heap = answer;
+        a_vector_append(&q->answers, (void*)answer_heap);
+        token = strtok(NULL, ",");
+    }
+
+    free(a);
 }
 
 int question_ask(const Question* q, int index) {
@@ -82,23 +110,27 @@ int question_ask(const Question* q, int index) {
     a_string answer = a_string_trim(&raw_answer);
     a_string_free(&raw_answer);
 
-    bool cond;
-
-    if (!q->case_sensitive) {
-        cond = a_string_equal_case_insensitive(&answer, &q->answer);
-    } else {
-        cond = a_string_equal(&answer, &q->answer);
-    }
-
     int reward;
-    if (cond) {
-        printf(S_BOLD S_GREEN "    Correct!\n" S_END);
-        printf("You get a " S_BOLD S_GREEN "%d" S_END " point reward.\n",
-               q->reward);
-        reward = q->reward;
-    } else {
-        printf(S_BOLD S_RED "    Incorrect!\n" S_END);
-        printf("You get a " S_BOLD S_RED "no" S_END " reward.\n");
+    for (size_t i = 0; i < q->answers.len; i++) {
+        bool cond;
+        if (!q->case_sensitive) {
+            cond = a_string_equal_case_insensitive(
+                &answer, (a_string*)q->answers.data[i]);
+        } else {
+            cond = a_string_equal(&answer, (a_string*)q->answers.data[i]);
+        }
+
+        if (cond) {
+            printf(S_BOLD S_GREEN "    Correct!\n" S_END);
+            printf("You get a " S_BOLD S_GREEN "%d" S_END " point reward.\n",
+                   q->reward);
+            reward = q->reward;
+            break;
+        } else if (!cond && i == q->answers.len - 1) {
+            printf(S_BOLD S_RED "    Incorrect!\n" S_END);
+            printf("You get a " S_BOLD S_RED "no" S_END " reward.\n");
+        }
+
         reward = 0;
     }
 
@@ -182,13 +214,13 @@ void questiongroup_parse_file(QuestionGroup* g) {
             goto loopend;
         }
 
-        a_string question = a_string_with_capacity(70);
-        a_string answer = a_string_with_capacity(70);
+        a_string question = a_string_with_capacity(100);
+        a_string answers = a_string_with_capacity(200);
         int reward = -1;
         char yn = 'y'; // why cant i scanf with %c lol
 
         int scanf_result = sscanf(trimmed.data, "%[^;];%[^;];%d;%c[yn]",
-                                  question.data, answer.data, &reward, &yn);
+                                  question.data, answers.data, &reward, &yn);
 
         if (scanf_result < 4) {
             fatal_noexit("required fields not found in line `%s`",
@@ -198,8 +230,8 @@ void questiongroup_parse_file(QuestionGroup* g) {
                 warn("question field not found");
             }
 
-            if (strlen(answer.data) == 0) {
-                warn("answer field not found");
+            if (strlen(answers.data) == 0) {
+                warn("answers field not found");
             }
 
             if (reward == -1) {
@@ -210,9 +242,9 @@ void questiongroup_parse_file(QuestionGroup* g) {
         }
 
         question.len = strlen(question.data);
-        answer.len = strlen(answer.data);
+        answers.len = strlen(answers.data);
 
-        Question qn = question_new(question, answer, reward, (yn == 'y'));
+        Question qn = question_new(question, answers, reward, (yn == 'y'));
         questiongroup_add_question(g, qn);
 
     loopend:

@@ -18,7 +18,7 @@
 
 typedef struct {
     a_string prompt;
-    a_string answer;
+    a_vector answers; // a_vector of a_string (peak)
     int reward;
     bool case_sensitive;
 } Question;
@@ -32,10 +32,13 @@ typedef struct {
     bool write;
 } QuestionGroup;
 
-Question question_new(a_string prompt, a_string answer, int reward,
+Question question_new(a_string prompt, a_string answers, int reward,
                       bool case_sensitive);
 Question question_new_empty(void); // create an empty question
 void question_destroy(Question* q);
+void question_split_answers_to_vector(
+    Question* q,
+    const char* answers); // having a vector already filled will cause UB
 int question_ask(const Question* q,
                  int index); // negative index: no index, return: reward
 

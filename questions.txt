@@ -1,5 +1,5 @@
 // question;answer;reward;case sensitivity [y/n]
 
 are apples red?;yes;2;y
-is beej hot?;definitely;2;n
-is guyfrom a meow?;you are stupid;100;n
+is beej hot?;definitely,yes;2;n
+is guyfrom a meow?;you are stupid,meow;100;n
