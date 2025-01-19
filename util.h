@@ -11,9 +11,11 @@
 
 #pragma once
 
-#define S_BOLD    "\033[1m"
-#define S_DIM     "\033[2m"
-#define S_END     "\033[0m"
+#define S_BOLD "\033[1m"
+#define S_DIM  "\033[2m"
+#define S_END  "\033[0m"
+
+#define S_BLACK   "\033[30m"
 #define S_RED     "\033[31m"
 #define S_GREEN   "\033[32m"
 #define S_YELLOW  "\033[33m"
@@ -21,6 +23,21 @@
 #define S_MAGENTA "\033[35m"
 #define S_CYAN    "\033[36m"
 #define S_WHITE   "\033[37m"
+
+#define S_BGBLACK   "\033[40m"
+#define S_BGRED     "\033[41m"
+#define S_BGGREEN   "\033[42m"
+#define S_BGYELLOW  "\033[43m"
+#define S_BGBLUE    "\033[44m"
+#define S_BGMAGENTA "\033[45m"
+#define S_BGCYAN    "\033[46m"
+#define S_BGWHITE   "\033[47m"
+
+#define S_CLEAR_SCREEN "\033[2J\033[H"
+#define S_CLEAR_LINE   "\r\033[K"
+
+#define S_ENTER_ALT "\033[?1049h"
+#define S_LEAVE_ALT "\033[?1049l"
 
 #define check_alloc(ptr)                                                       \
                                                                                \
