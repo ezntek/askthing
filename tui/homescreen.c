@@ -16,6 +16,9 @@
 #include "../a_string.h"
 #include "tui.h"
 
+#define OBR S_DIM " [" S_END
+#define CBR S_DIM "]" S_END
+
 static void draw_display(TuiHomescreen* s) {
     a_string buf;
 
@@ -25,21 +28,21 @@ static void draw_display(TuiHomescreen* s) {
     // what do you want to do?
     //   [load set] [about] [exit] <<-- ONLY DRAW THIS
 
-    printf("  "); // offset
+    printf(" "); // offset
     fflush(stdout);
 
     switch (s->act) {
         case TUI_HOME_LOAD_SET: {
-            buf = astr(S_BGBLUE S_WHITE S_BOLD " load set " S_END
-                                               " [about] [exit]");
+            buf = astr(OBR S_GREEN S_BOLD "load set" S_END CBR OBR
+                                          "about" CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_ABOUT: {
-            buf = astr("[load set] " S_BGBLUE S_WHITE S_BOLD " about " S_END
-                       " [exit]");
+            buf = astr(OBR "load set" CBR OBR S_GREEN S_BOLD
+                           "about" S_END CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_EXIT: {
-            buf = astr("[load set] [about] " S_BGBLUE S_WHITE S_BOLD
-                       " exit " S_END);
+            buf = astr(OBR "load set" CBR OBR "about" CBR OBR S_GREEN S_BOLD
+                           "exit" S_END CBR);
         } break;
     }
 

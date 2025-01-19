@@ -27,12 +27,14 @@
     "License, v. 2.0. If a copy of the MPL was not distributed with this\n"    \
     "file, You can obtain one at http://mozilla.org/MPL/2.0/."
 
+#define LINES  S_DIM "--------------------" S_END "\n"
+#define PROMPT S_BOLD "\nchoose an action.\n" S_END
+
 #define WELCOME                                                                \
-    S_BGBLUE S_WHITE S_BOLD                                                    \
-        "Welcome to askthing.\n" S_END S_DIM "--------------------\n"          \
-        "Copyright (c) Eason Qin, 2025.\n" LICENSE S_END "\n"                  \
-        "\nversion " VERSION "\n" S_DIM "--------------------\n\n" S_END       \
-        "what do you want to do today?\n"
+    S_BOLD                                                                     \
+    "Welcome to askthing.\n" S_END S_DIM "--------------------\n"              \
+    "Copyright (c) Eason Qin, 2025.\n" LICENSE S_END "\n"                      \
+    "\nversion " VERSION "\n" S_DIM "--------------------\n\n" S_END PROMPT
 
 #define VERSION "0.1.0"
 bool running;
@@ -43,11 +45,15 @@ static void ask_question(int argc, char** argv) {
     if (argc >= 1) {
         filename = astr(argv[0]);
     } else {
-        printf("enter questions filename: ");
+        printf(S_DIM "enter questions filename: " S_END);
         fflush(stdout);
         a_string rawfn = a_string_with_capacity(100);
         fgets(rawfn.data, 100, stdin);
         rawfn.len = strlen(rawfn.data);
+        if (rawfn.len == 1) {
+            fatal("no file provided");
+            a_string_free(&rawfn);
+        }
         filename = a_string_trim(&rawfn);
         a_string_free(&rawfn);
     }
@@ -56,26 +62,35 @@ static void ask_question(int argc, char** argv) {
     questiongroup_ask(&g);
     questiongroup_destroy(&g);
     a_string_free(&filename);
-    nanosleep(&(struct timespec){.tv_sec = 2}, NULL);
+    // nanosleep(&(struct timespec){.tv_sec = 2}, NULL);
 }
 
 static void about(void) {
     printf("version " VERSION "\n");
-    nanosleep(&(struct timespec){.tv_sec = 2}, NULL);
+    // nanosleep(&(struct timespec){.tv_sec = 2}, NULL);
 }
 
-static void handle_ctrlc(int dummy) { running = 0; }
+static void handle_ctrlc(int dummy) {
+    running = 0;
+    exit(1);
+}
+
+void handle_exit(void) {
+    printf(S_LEAVE_ALT);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &default_termios);
+}
 
 int main(int argc, char** argv) {
     argc--;
     argv++;
 
     signal(SIGINT, handle_ctrlc);
+    atexit(handle_exit);
     running = 1;
 
     tcgetattr(STDIN_FILENO, &default_termios);
 
-    printf(S_ENTER_ALT S_CLEAR_SCREEN);
+    // printf(S_ENTER_ALT S_CLEAR_SCREEN);
     printf(WELCOME);
 
     TuiHomescreenAction a;
@@ -94,12 +109,10 @@ int main(int argc, char** argv) {
             case TUI_HOME_EXIT:
                 goto leave;
         }
-
-        printf(S_CLEAR_SCREEN WELCOME);
+        printf(PROMPT);
     } while (running);
 
 leave:
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &default_termios);
-    printf(S_LEAVE_ALT);
+    handle_exit();
     printf(S_BOLD "Bye\n" S_END);
 }

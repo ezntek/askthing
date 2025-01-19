@@ -181,7 +181,7 @@ void questiongroup_open_file(QuestionGroup* g, const char* filename) {
         fatal("file doesn't exist");
     }
 
-    info(S_DIM "loaded file at path `%s`." S_END, g->filename.data);
+    info(S_DIM "found file at path `%s`." S_END, g->filename.data);
 }
 
 void questiongroup_parse_file(QuestionGroup* g) {
@@ -252,6 +252,8 @@ void questiongroup_parse_file(QuestionGroup* g) {
     }
 
     a_string_free(&line);
+
+    info(S_DIM "loaded file at path `%s`." S_END, g->filename.data);
 }
 
 void questiongroup_destroy(QuestionGroup* g) {
