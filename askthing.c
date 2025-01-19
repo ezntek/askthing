@@ -34,7 +34,7 @@
     S_BOLD                                                                     \
     "Welcome to askthing.\n" S_END S_DIM "--------------------\n"              \
     "Copyright (c) Eason Qin, 2025.\n" LICENSE S_END "\n"                      \
-    "\nversion " VERSION "\n" S_DIM "--------------------\n\n" S_END PROMPT
+    "\nversion " VERSION "\n" S_DIM "--------------------\n" S_END PROMPT
 
 #define VERSION "0.1.0"
 bool running;
