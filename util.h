@@ -39,6 +39,9 @@
 #define S_ENTER_ALT "\033[?1049h"
 #define S_LEAVE_ALT "\033[?1049l"
 
+#define S_SHOWCURSOR "\033[?25h"
+#define S_HIDECURSOR "\033[?25l"
+
 #define check_alloc(ptr)                                                       \
                                                                                \
     if (ptr == NULL) {                                                         \

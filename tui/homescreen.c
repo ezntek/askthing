@@ -19,6 +19,8 @@
 #define OBR S_DIM " [" S_END
 #define CBR S_DIM "]" S_END
 
+static TuiHomescreenSelected prev_sel = -1;
+
 static void draw_display(TuiHomescreen* s) {
     a_string buf;
 
@@ -31,30 +33,32 @@ static void draw_display(TuiHomescreen* s) {
     printf(" "); // offset
     fflush(stdout);
 
-    switch (s->act) {
+    switch (s->sel) {
         case TUI_HOME_LOAD_SET: {
             buf = astr(OBR S_GREEN S_BOLD
-                       "load set" S_END CBR OBR "load favorites" CBR OBR
-                       "save favorites" CBR OBR "about" CBR OBR "exit" CBR);
+                       "load set" S_END CBR OBR "favorite sets" CBR OBR
+                       "new favorite set" CBR OBR "about" CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_LOAD_FAVORITE: {
-            buf = astr(OBR "load set" CBR OBR S_GREEN S_BOLD
-                           "load favorites" S_END CBR OBR
-                           "save favorites" CBR OBR "about" CBR OBR "exit" CBR);
+            buf =
+                astr(OBR "load set" CBR OBR S_GREEN S_BOLD
+                         "favorite sets" S_END CBR OBR
+                         "new favorite set" CBR OBR "about" CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_SAVE_FAVORITE: {
-            buf = astr(
-                OBR "load set" CBR OBR "load favorites" CBR OBR S_GREEN S_BOLD
-                    "save favorites" S_END CBR OBR "about" CBR OBR "exit" CBR);
+            buf = astr(OBR "load set" CBR OBR
+                           "favorite sets" CBR OBR S_GREEN S_BOLD
+                           "new favorite set" S_END CBR OBR "about" CBR OBR
+                           "exit" CBR);
         } break;
         case TUI_HOME_ABOUT: {
-            buf = astr(OBR "load set" CBR OBR "load favorites" CBR OBR
-                           "save favorites" CBR OBR S_GREEN S_BOLD
+            buf = astr(OBR "load set" CBR OBR "favorite sets" CBR OBR
+                           "new favorite set" CBR OBR S_GREEN S_BOLD
                            "about" S_END CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_EXIT: {
-            buf = astr(OBR "load set" CBR OBR "load favorites" CBR OBR
-                           "save favorites" CBR OBR
+            buf = astr(OBR "load set" CBR OBR "favorite sets" CBR OBR
+                           "new favorite set" CBR OBR
                            "about" CBR OBR S_GREEN S_BOLD "exit" S_END CBR);
         } break;
     }
@@ -73,7 +77,7 @@ static TuiHomescreenCmd get_cmd_with_esc(void) {
             return TUI_CMD_NULL;
         } break;
         case 'B': {
-            return TUI_CMD_SEL;
+            return TUI_CMD_NULL;
         } break;
         case 'C': {
             return TUI_CMD_RIGHT;
@@ -109,20 +113,20 @@ static TuiHomescreenCmd get_cmd(void) {
     }
 }
 
-bool handle_cmd(TuiHomescreen* s) {
+static bool handle_cmd(TuiHomescreen* s) {
     const int MAX = 4;
     switch (s->cmd) {
         case TUI_CMD_RIGHT: {
-            if (s->act + 1 > MAX)
-                s->act = 0;
+            if (s->sel + 1 > MAX)
+                s->sel = 0;
             else
-                s->act++;
+                s->sel++;
         } break;
         case TUI_CMD_LEFT: {
-            if (s->act == 0)
-                s->act = MAX;
+            if (s->sel == 0)
+                s->sel = MAX;
             else
-                s->act--;
+                s->sel--;
         } break;
         case TUI_CMD_SEL: {
             return true;
@@ -134,9 +138,14 @@ bool handle_cmd(TuiHomescreen* s) {
     return false;
 }
 
-TuiHomescreenAction tui_homescreen(void) {
-    TuiHomescreen state = {0};
-    state.act = TUI_HOME_LOAD_SET;
+TuiHomescreenSelected tui_homescreen(void) {
+    TuiHomescreen state = {.sel = TUI_HOME_LOAD_SET};
+
+    if (prev_sel != -1) {
+        state.sel = prev_sel;
+    }
+
+    printf(S_HIDECURSOR);
 
     do {
         draw_display(&state);
@@ -146,8 +155,11 @@ TuiHomescreenAction tui_homescreen(void) {
         if (handle_cmd(&state))
             break;
 
-        printf(S_CLEAR_LINE);
+        printf("\r");
     } while (state.cmd != TUI_CMD_SEL);
 
-    return state.act;
+    printf(S_SHOWCURSOR);
+
+    prev_sel = state.sel;
+    return state.sel;
 }

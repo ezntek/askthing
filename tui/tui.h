@@ -9,6 +9,10 @@
  *
  */
 
+#include <stddef.h>
+
+#include "../a_vector.h"
+
 typedef enum {
     TUI_CMD_RIGHT = 0,
     TUI_CMD_LEFT = 1,
@@ -22,14 +26,29 @@ typedef enum {
     TUI_HOME_SAVE_FAVORITE = 2,
     TUI_HOME_ABOUT = 3,
     TUI_HOME_EXIT = 4,
-} TuiHomescreenAction;
+} TuiHomescreenSelected;
 
 typedef struct {
-    TuiHomescreenAction act;
+    TuiHomescreenSelected sel;
     TuiHomescreenCmd cmd;
 } TuiHomescreen;
 
-TuiHomescreenAction tui_homescreen(void);
+typedef enum {
+    TUI_FAV_UP = 0,
+    TUI_FAV_DOWN = 1,
+    TUI_FAV_SEL = 2,
+    TUI_FAV_NULL = 3,
+} TuiFavoritesCmd;
+
+typedef struct {
+    a_vector* entries;
+    TuiFavoritesCmd cmd;
+    size_t sel_idx;
+    size_t max_idx; // max indexed favorite item
+} TuiFavorites;
+
+TuiHomescreenSelected tui_homescreen(void);
+size_t tui_favorites(a_vector* v);
 
 void tui_toggle_rawmode(void);
 char tui_rgetchar(void);

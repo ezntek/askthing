@@ -1,7 +1,7 @@
 CC = cc
 INCLUDE = 
 LIBS = 
-OBJ = askthing.o question.o a_string.o a_vector.o tui/homescreen.o tui/tui.o
+OBJ = askthing.o question.o a_string.o a_vector.o tui/homescreen.o tui/tui.o tui/favorites.o
 HEADERS = question.h a_string.h a_vector.h util.h tui/tui.h
 
 RELEASE_CFLAGS = -O2 -Wall -Wextra -pedantic -march=native -flto=auto $(INCLUDE) $(LIBS)

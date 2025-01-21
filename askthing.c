@@ -57,6 +57,9 @@ static a_string ensure_cfg_dir(void);
 static void load_favorites(void);
 static void leave(void);
 
+static void view_favorites(void);
+static void save_favorite(void);
+
 static void ask_question(int argc, char** argv) {
     a_string filename;
     if (argc >= 1) {
@@ -91,6 +94,7 @@ static void handle_ctrlc(int a) {
 
 static void handle_exit(void) {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &default_termios);
+    printf(S_SHOWCURSOR);
 }
 
 static a_string ensure_config_dir(void) {
@@ -141,6 +145,10 @@ static void load_favorites(void) {
         while (fgets(line.data, 200, s.fav_fp) != NULL) {
             line.len = strlen(line.data);
             a_string new = a_string_trim(&line);
+
+            if (new.len == 0)
+                continue;
+
             a_string* heapstr = calloc(1, sizeof(a_string));
             check_alloc(heapstr);
             *heapstr = new;
@@ -153,6 +161,21 @@ static void load_favorites(void) {
 
     a_string_free(&favs_file);
     a_string_free(&cfg_dir);
+}
+
+static void view_favorites(void) {
+    size_t index = tui_favorites(&s.favorites);
+    a_string* fn = s.favorites.data[index];
+    if (index == s.favorites.len) {
+        info("left with exit");
+    } else {
+        info("got `%s`", fn->data);
+    }
+}
+
+static void save_favorite(void) {
+    warn("not implemented");
+    // aaa
 }
 
 static void setup(void) {
@@ -169,7 +192,7 @@ static void setup(void) {
 static void leave(void) {
     for (size_t i = 0; i < s.favorites.len; i++) {
         a_string_free((a_string*)s.favorites.data[i]);
-        free(s.favorites.data);
+        free(s.favorites.data[i]);
     }
     a_vector_free(&s.favorites);
 
@@ -188,7 +211,7 @@ int main(int argc, char** argv) {
 
     setup();
 
-    TuiHomescreenAction a;
+    TuiHomescreenSelected a;
 
     do {
         a = tui_homescreen();
@@ -199,10 +222,10 @@ int main(int argc, char** argv) {
                 ask_question(argc, argv);
             } break;
             case TUI_HOME_LOAD_FAVORITE: {
-                printf(S_RED "not implemented" S_END "\n");
+                view_favorites();
             } break;
             case TUI_HOME_SAVE_FAVORITE: {
-                printf(S_RED "not implemented" S_END "\n");
+                save_favorite();
             } break;
             case TUI_HOME_ABOUT: {
                 about();
