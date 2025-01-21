@@ -186,12 +186,10 @@ void questiongroup_open_file(QuestionGroup* g, const char* filename) {
 
 void questiongroup_parse_file(QuestionGroup* g) {
     // get the line
-
-    char* fgets_rv;
     const size_t linecap = 250;
     a_string line = a_string_with_capacity(linecap);
 
-    while ((fgets_rv = fgets(line.data, linecap, g->fp)) != NULL) {
+    while (fgets(line.data, linecap, g->fp) != NULL) {
         // hacky aah
         line.len = strlen(line.data);
 

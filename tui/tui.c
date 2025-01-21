@@ -10,13 +10,10 @@
  */
 
 #include <stdio.h>
-
-#include "../a_string.h"
-#include "tui.h"
-
-#include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
+
+#include "tui.h"
 
 void tui_toggle_rawmode(void) {
     struct termios term;

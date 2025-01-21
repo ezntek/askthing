@@ -18,8 +18,10 @@ typedef enum {
 
 typedef enum {
     TUI_HOME_LOAD_SET = 0,
-    TUI_HOME_ABOUT = 1,
-    TUI_HOME_EXIT = 2,
+    TUI_HOME_LOAD_FAVORITE = 1,
+    TUI_HOME_SAVE_FAVORITE = 2,
+    TUI_HOME_ABOUT = 3,
+    TUI_HOME_EXIT = 4,
 } TuiHomescreenAction;
 
 typedef struct {
@@ -28,5 +30,6 @@ typedef struct {
 } TuiHomescreen;
 
 TuiHomescreenAction tui_homescreen(void);
+
 void tui_toggle_rawmode(void);
 char tui_rgetchar(void);

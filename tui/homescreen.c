@@ -33,16 +33,29 @@ static void draw_display(TuiHomescreen* s) {
 
     switch (s->act) {
         case TUI_HOME_LOAD_SET: {
-            buf = astr(OBR S_GREEN S_BOLD "load set" S_END CBR OBR
-                                          "about" CBR OBR "exit" CBR);
+            buf = astr(OBR S_GREEN S_BOLD
+                       "load set" S_END CBR OBR "load favorite" CBR OBR
+                       "save favorite" CBR OBR "about" CBR OBR "exit" CBR);
+        } break;
+        case TUI_HOME_LOAD_FAVORITE: {
+            buf = astr(OBR "load set" CBR OBR S_GREEN S_BOLD
+                           "load favorite" S_END CBR OBR "save favorite" CBR OBR
+                           "about" CBR OBR "exit" CBR);
+        } break;
+        case TUI_HOME_SAVE_FAVORITE: {
+            buf = astr(
+                OBR "load set" CBR OBR "load favorite" CBR OBR S_GREEN S_BOLD
+                    "save favorite" S_END CBR OBR "about" CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_ABOUT: {
-            buf = astr(OBR "load set" CBR OBR S_GREEN S_BOLD
+            buf = astr(OBR "load set" CBR OBR "load favorite" CBR OBR
+                           "save favorite" CBR OBR S_GREEN S_BOLD
                            "about" S_END CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_EXIT: {
-            buf = astr(OBR "load set" CBR OBR "about" CBR OBR S_GREEN S_BOLD
-                           "exit" S_END CBR);
+            buf = astr(OBR "load set" CBR OBR "load favorite" CBR OBR
+                           "save favorite" CBR OBR
+                           "about" CBR OBR S_GREEN S_BOLD "exit" S_END CBR);
         } break;
     }
 
@@ -60,8 +73,7 @@ static TuiHomescreenCmd get_cmd_with_esc(void) {
             return TUI_CMD_NULL;
         } break;
         case 'B': {
-            // no need down
-            return TUI_CMD_NULL;
+            return TUI_CMD_SEL;
         } break;
         case 'C': {
             return TUI_CMD_RIGHT;
@@ -98,16 +110,17 @@ static TuiHomescreenCmd get_cmd(void) {
 }
 
 bool handle_cmd(TuiHomescreen* s) {
+    const int MAX = 4;
     switch (s->cmd) {
         case TUI_CMD_RIGHT: {
-            if (s->act + 1 > 2)
+            if (s->act + 1 > MAX)
                 s->act = 0;
             else
                 s->act++;
         } break;
         case TUI_CMD_LEFT: {
             if (s->act == 0)
-                s->act = 2;
+                s->act = MAX;
             else
                 s->act--;
         } break;

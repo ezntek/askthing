@@ -9,15 +9,17 @@
  *
  */
 
+#include <dirent.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <termios.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "a_string.h"
+#include "a_vector.h"
 #include "question.h"
 #include "tui/tui.h"
 #include "util.h"
@@ -37,8 +39,22 @@
     "\nversion " VERSION "\n" S_DIM "--------------------\n" S_END PROMPT
 
 #define VERSION "0.1.0"
+
+struct state {
+    a_vector favorites; // a_vector of a_string
+};
+
+struct state s;
 bool running;
 struct termios default_termios;
+
+static void ask_question(int argc, char** argv);
+static void about(void);
+static void handle_exit(void);
+static void setup(void);
+static a_string ensure_cfg_dir(void);
+static void load_favorites(void);
+static void leave(void);
 
 static void ask_question(int argc, char** argv) {
     a_string filename;
@@ -62,36 +78,101 @@ static void ask_question(int argc, char** argv) {
     questiongroup_ask(&g);
     questiongroup_destroy(&g);
     a_string_free(&filename);
-    // nanosleep(&(struct timespec){.tv_sec = 2}, NULL);
 }
 
-static void about(void) {
-    printf("version " VERSION "\n");
-    // nanosleep(&(struct timespec){.tv_sec = 2}, NULL);
-}
+static void about(void) { printf("version " VERSION "\n"); }
 
-static void handle_ctrlc(int dummy) {
+static void handle_ctrlc(int a) {
+    a = a; // bypass compiler warning
     running = 0;
     exit(1);
 }
 
-void handle_exit(void) {
-    printf(S_LEAVE_ALT);
+static void handle_exit(void) {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &default_termios);
+}
+
+static a_string ensure_config_dir(void) {
+    char* cfg_dir_raw = getenv("XDG_CONFIG_HOME");
+    a_string cfg_dir_path;
+
+    if (cfg_dir_raw == NULL) {
+        char* home = getenv("HOME");
+
+        if (home == NULL) {
+            fatal("could not find $HOME environment variable");
+        }
+
+        cfg_dir_path = a_string_sprintf("%s/.config/askthing", home);
+    } else {
+        cfg_dir_path = a_string_sprintf("%s/askthing", cfg_dir_raw);
+    }
+
+    // sketchy but it works
+    DIR* cfg_dir = opendir(cfg_dir_path.data);
+    if (cfg_dir != NULL) {
+        closedir(cfg_dir);
+    } else {
+        mkdir(cfg_dir_path.data, 755);
+    }
+
+    return cfg_dir_path;
+}
+
+static void load_favorites(void) {
+    a_string cfg_dir = ensure_config_dir();
+    a_string favs_file = a_string_sprintf("%s/favorites", cfg_dir.data);
+
+    FILE* fp = fopen(favs_file.data, "r+");
+
+    if (fp == NULL) {
+        fp = fopen(favs_file.data, "w+");
+    }
+
+    a_string line = a_string_with_capacity(200);
+    while (fgets(line.data, 200, fp) != NULL) {
+        line.len = strlen(line.data);
+        a_string new = a_string_trim(&line);
+        a_string* heapstr = calloc(1, sizeof(a_string));
+        check_alloc(heapstr);
+        *heapstr = new;
+        a_vector_append(&s.favorites, (void*)heapstr);
+    }
+
+    fclose(fp);
+    a_string_free(&line);
+    a_string_free(&favs_file);
+    a_string_free(&cfg_dir);
+}
+
+static void setup(void) {
+    running = 1;
+    s.favorites = a_vector_new();
+    load_favorites();
+
+    tcgetattr(STDIN_FILENO, &default_termios);
+    signal(SIGINT, handle_ctrlc);
+    atexit(handle_exit);
+    printf(WELCOME);
+}
+
+static void leave(void) {
+    for (size_t i = 0; i < s.favorites.len; i++) {
+        a_string_free((a_string*)s.favorites.data[i]);
+        free(s.favorites.data);
+    }
+    a_vector_free(&s.favorites);
+
+    handle_exit();
+    printf(S_BOLD "Bye\n" S_END);
+    exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char** argv) {
     argc--;
     argv++;
 
-    signal(SIGINT, handle_ctrlc);
-    atexit(handle_exit);
-    running = 1;
-
-    tcgetattr(STDIN_FILENO, &default_termios);
-
-    // printf(S_ENTER_ALT S_CLEAR_SCREEN);
-    printf(WELCOME);
+    setup();
 
     TuiHomescreenAction a;
 
@@ -103,16 +184,22 @@ int main(int argc, char** argv) {
             case TUI_HOME_LOAD_SET: {
                 ask_question(argc, argv);
             } break;
+            case TUI_HOME_LOAD_FAVORITE: {
+                printf(S_RED "not implemented" S_END "\n");
+            } break;
+            case TUI_HOME_SAVE_FAVORITE: {
+                printf(S_RED "not implemented" S_END "\n");
+            } break;
             case TUI_HOME_ABOUT: {
                 about();
             } break;
-            case TUI_HOME_EXIT:
-                goto leave;
+            case TUI_HOME_EXIT: {
+                running = 0;
+                leave();
+            }
         }
         printf(PROMPT);
     } while (running);
 
-leave:
-    handle_exit();
-    printf(S_BOLD "Bye\n" S_END);
+    leave();
 }
