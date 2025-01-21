@@ -19,7 +19,7 @@
 #define OBR S_DIM " [" S_END
 #define CBR S_DIM "]" S_END
 
-static TuiHomescreenSelected prev_sel = -1;
+static int prev_sel = -1;
 
 static void draw_display(TuiHomescreen* s) {
     a_string buf;
@@ -114,7 +114,7 @@ static TuiHomescreenCmd get_cmd(void) {
 }
 
 static bool handle_cmd(TuiHomescreen* s) {
-    const int MAX = 4;
+    const size_t MAX = 4;
     switch (s->cmd) {
         case TUI_CMD_RIGHT: {
             if (s->sel + 1 > MAX)

@@ -53,7 +53,7 @@ static void ask_question(int argc, char** argv);
 static void about(void);
 static void handle_exit(void);
 static void setup(void);
-static a_string ensure_cfg_dir(void);
+static a_string ensure_config_dir(void);
 static void load_favorites(void);
 static void leave(void);
 
@@ -71,10 +71,16 @@ static void ask_question(int argc, char** argv) {
         fgets(rawfn.data, 100, stdin);
         rawfn.len = strlen(rawfn.data);
         if (rawfn.len == 1) {
-            fatal("no file provided");
+            warn("no file provided");
             a_string_free(&rawfn);
         }
         filename = a_string_trim(&rawfn);
+        FILE* tmp = fopen(filename.data, "r");
+        if (tmp == NULL) {
+            warn("file does not exist");
+        } else {
+            fclose(tmp);
+        }
         a_string_free(&rawfn);
     }
 
@@ -174,8 +180,33 @@ static void view_favorites(void) {
 }
 
 static void save_favorite(void) {
-    warn("not implemented");
-    // aaa
+    printf(S_DIM "add a favorite: " S_END);
+    fflush(stdout);
+    a_string rawfn = a_string_with_capacity(100);
+    fgets(rawfn.data, 100, stdin);
+    rawfn.len = strlen(rawfn.data);
+    if (rawfn.len == 1) {
+        fatal("no file provided");
+        a_string_free(&rawfn);
+    }
+    a_string filename = a_string_trim(&rawfn);
+    a_string_free(&rawfn);
+
+    FILE* tmp = fopen(filename.data, "r");
+    if (tmp != NULL) {
+        fclose(tmp);
+
+        fputs(filename.data, s.fav_fp);
+        fputs("\n", s.fav_fp);
+
+        a_string* fnheap = calloc(1, sizeof(a_string));
+        check_alloc(fnheap);
+        *fnheap = filename;
+        a_vector_append(&s.favorites, (void*)fnheap);
+    } else {
+        warn("file does not exist!");
+        a_string_free(&filename);
+    }
 }
 
 static void setup(void) {
@@ -190,6 +221,7 @@ static void setup(void) {
 }
 
 static void leave(void) {
+
     for (size_t i = 0; i < s.favorites.len; i++) {
         a_string_free((a_string*)s.favorites.data[i]);
         free(s.favorites.data[i]);

@@ -146,7 +146,7 @@ size_t tui_favorites(a_vector* v) {
 
         // just go up the number of lines down
         printf("\033[%zuA", state.max_idx + 1);
-    } while (state.cmd != TUI_FAV_NULL);
+    } while (state.cmd != TUI_FAV_SEL);
 
     printf(S_SHOWCURSOR);
 
