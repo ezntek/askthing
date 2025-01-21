@@ -34,27 +34,27 @@ static void draw_display(TuiHomescreen* s) {
     switch (s->act) {
         case TUI_HOME_LOAD_SET: {
             buf = astr(OBR S_GREEN S_BOLD
-                       "load set" S_END CBR OBR "load favorite" CBR OBR
-                       "save favorite" CBR OBR "about" CBR OBR "exit" CBR);
+                       "load set" S_END CBR OBR "load favorites" CBR OBR
+                       "save favorites" CBR OBR "about" CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_LOAD_FAVORITE: {
             buf = astr(OBR "load set" CBR OBR S_GREEN S_BOLD
-                           "load favorite" S_END CBR OBR "save favorite" CBR OBR
-                           "about" CBR OBR "exit" CBR);
+                           "load favorites" S_END CBR OBR
+                           "save favorites" CBR OBR "about" CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_SAVE_FAVORITE: {
             buf = astr(
-                OBR "load set" CBR OBR "load favorite" CBR OBR S_GREEN S_BOLD
-                    "save favorite" S_END CBR OBR "about" CBR OBR "exit" CBR);
+                OBR "load set" CBR OBR "load favorites" CBR OBR S_GREEN S_BOLD
+                    "save favorites" S_END CBR OBR "about" CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_ABOUT: {
-            buf = astr(OBR "load set" CBR OBR "load favorite" CBR OBR
-                           "save favorite" CBR OBR S_GREEN S_BOLD
+            buf = astr(OBR "load set" CBR OBR "load favorites" CBR OBR
+                           "save favorites" CBR OBR S_GREEN S_BOLD
                            "about" S_END CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_EXIT: {
-            buf = astr(OBR "load set" CBR OBR "load favorite" CBR OBR
-                           "save favorite" CBR OBR
+            buf = astr(OBR "load set" CBR OBR "load favorites" CBR OBR
+                           "save favorites" CBR OBR
                            "about" CBR OBR S_GREEN S_BOLD "exit" S_END CBR);
         } break;
     }

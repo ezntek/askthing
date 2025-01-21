@@ -55,7 +55,8 @@
                 "`",                                                           \
                 __LINE__, __func__, __FILE__);                                 \
         eprintf(__VA_ARGS__);                                                  \
-        eprintf("`\nplease report this to the developer.\n");                  \
+        eprintf(S_DIM                                                          \
+                "`\n       please report this to the developer.\n" S_END);     \
         exit(1);                                                               \
     }
 

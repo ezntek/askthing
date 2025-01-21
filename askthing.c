@@ -42,6 +42,7 @@
 
 struct state {
     a_vector favorites; // a_vector of a_string
+    FILE* fav_fp;
 };
 
 struct state s;
@@ -113,8 +114,11 @@ static a_string ensure_config_dir(void) {
     if (cfg_dir != NULL) {
         closedir(cfg_dir);
     } else {
-        mkdir(cfg_dir_path.data, 755);
+        if (mkdir(cfg_dir_path.data, 0777))
+            panic("could not make config dir at `%s`", cfg_dir_path.data);
     }
+
+    info("opened config dir");
 
     return cfg_dir_path;
 }
@@ -123,24 +127,30 @@ static void load_favorites(void) {
     a_string cfg_dir = ensure_config_dir();
     a_string favs_file = a_string_sprintf("%s/favorites", cfg_dir.data);
 
-    FILE* fp = fopen(favs_file.data, "r+");
+    info("config at: %s", favs_file.data);
 
-    if (fp == NULL) {
-        fp = fopen(favs_file.data, "w+");
+    s.fav_fp = fopen(favs_file.data, "r+");
+
+    if (s.fav_fp == NULL) {
+        s.fav_fp = fopen(favs_file.data, "w+");
+        if (s.fav_fp == NULL) {
+            panic("could not open favorites file for w+");
+        }
+    } else {
+        a_string line = a_string_with_capacity(200);
+        while (fgets(line.data, 200, s.fav_fp) != NULL) {
+            line.len = strlen(line.data);
+            a_string new = a_string_trim(&line);
+            a_string* heapstr = calloc(1, sizeof(a_string));
+            check_alloc(heapstr);
+            *heapstr = new;
+            a_vector_append(&s.favorites, (void*)heapstr);
+        }
+
+        info("loaded favorites");
+        a_string_free(&line);
     }
 
-    a_string line = a_string_with_capacity(200);
-    while (fgets(line.data, 200, fp) != NULL) {
-        line.len = strlen(line.data);
-        a_string new = a_string_trim(&line);
-        a_string* heapstr = calloc(1, sizeof(a_string));
-        check_alloc(heapstr);
-        *heapstr = new;
-        a_vector_append(&s.favorites, (void*)heapstr);
-    }
-
-    fclose(fp);
-    a_string_free(&line);
     a_string_free(&favs_file);
     a_string_free(&cfg_dir);
 }
@@ -162,6 +172,10 @@ static void leave(void) {
         free(s.favorites.data);
     }
     a_vector_free(&s.favorites);
+
+    if (s.fav_fp != NULL) {
+        fclose(s.fav_fp);
+    }
 
     handle_exit();
     printf(S_BOLD "Bye\n" S_END);
