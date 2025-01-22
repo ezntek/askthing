@@ -59,6 +59,7 @@ static void load_favorites(void);
 static void leave(void);
 
 static void view_favorites(void);
+static void del_favorites(void);
 static void save_favorite(void);
 
 static a_string get_question_filename_from_stdin() {
@@ -169,18 +170,45 @@ static void load_favorites(void) {
 }
 
 static void view_favorites(void) {
-    size_t index = tui_favorites(&s.favorites);
+    size_t index = tui_favorites(&s.favorites, astr("play?"));
     a_string* fn = s.favorites.data[index];
 
     restore_terminal();
-    if (index == s.favorites.len) {
-        info("left with exit");
-    } else {
+    if (index != s.favorites.len) {
         ask_question(fn);
     }
 }
 
+static void del_favorites(void) {
+    size_t index = tui_favorites(&s.favorites, astr("delete?"));
+
+    restore_terminal();
+    if (index == s.favorites.len)
+        return;
+
+    // extreme jank.
+    a_string* deleted = a_vector_pop_at(&s.favorites, index); // the easy part
+    a_string_free(deleted);
+    free(deleted); // free the container too
+
+    // recalculate the path
+    a_string cfg_dir = ensure_config_dir();
+    a_string favs_file = a_string_sprintf("%s/favorites", cfg_dir.data);
+
+    // rewrite the whole file (at least there wont be fragmentation :P)
+    s.fav_fp = freopen(favs_file.data, "w+", s.fav_fp);
+    for (size_t i = 0; i < s.favorites.len; i++) {
+        a_string* line = s.favorites.data[i];
+        fputs(line->data, s.fav_fp);
+        fputs("\n", s.fav_fp);
+    }
+
+    a_string_free(&cfg_dir);
+    a_string_free(&favs_file);
+}
+
 static void save_favorite(void) {
+    // get the filename
     printf(S_DIM "add a favorite: " S_END);
     fflush(stdout);
     a_string rawfn = a_string_with_capacity(100);
@@ -193,13 +221,16 @@ static void save_favorite(void) {
     a_string filename = a_string_trim(&rawfn);
     a_string_free(&rawfn);
 
+    // check for its existence
     FILE* tmp = fopen(filename.data, "r");
     if (tmp != NULL) {
-        fclose(tmp);
+        fclose(tmp); // immediately close
 
+        // push to file
         fputs(filename.data, s.fav_fp);
         fputs("\n", s.fav_fp);
 
+        // push to buffer
         a_string* fnheap = calloc(1, sizeof(a_string));
         check_alloc(fnheap);
         *fnheap = filename;
@@ -222,7 +253,6 @@ static void setup(void) {
 }
 
 static void leave(void) {
-
     for (size_t i = 0; i < s.favorites.len; i++) {
         a_string_free((a_string*)s.favorites.data[i]);
         free(s.favorites.data[i]);
@@ -249,7 +279,9 @@ int main(int argc, char** argv) {
     do {
         a = tui_homescreen();
         printf("\n\n");
-        tcsetattr(STDIN_FILENO, TCSAFLUSH, &default_termios);
+
+        restore_terminal();
+
         switch (a) {
             case TUI_HOME_LOAD_SET: {
                 a_string fn = get_question_filename_from_stdin();
@@ -261,6 +293,9 @@ int main(int argc, char** argv) {
             } break;
             case TUI_HOME_SAVE_FAVORITE: {
                 save_favorite();
+            } break;
+            case TUI_HOME_DELETE_FAVORITE: {
+                del_favorites();
             } break;
             case TUI_HOME_ABOUT: {
                 about();

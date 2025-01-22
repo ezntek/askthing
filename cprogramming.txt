@@ -1,0 +1,4 @@
+what is the best C version?;c99,c11,c23;1;n
+what is it called when you access out of bounds memory?;heap buffer overflow,segfault;2;n
+what tool allows C to be ran?;compiler;1;n
+is C or Python faster?;C;1;n

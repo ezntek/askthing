@@ -36,29 +36,37 @@ static void draw_display(TuiHomescreen* s) {
     switch (s->sel) {
         case TUI_HOME_LOAD_SET: {
             buf = astr(OBR S_GREEN S_BOLD
-                       "load set" S_END CBR OBR "favorite sets" CBR OBR
-                       "new favorite set" CBR OBR "about" CBR OBR "exit" CBR);
+                       "load set" S_END CBR OBR "favorites" CBR OBR
+                       "add favorite" CBR OBR "delete favorites" CBR OBR
+                       "about" CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_LOAD_FAVORITE: {
             buf =
                 astr(OBR "load set" CBR OBR S_GREEN S_BOLD
-                         "favorite sets" S_END CBR OBR
-                         "new favorite set" CBR OBR "about" CBR OBR "exit" CBR);
+                         "favorites" S_END CBR OBR "add favorite" CBR OBR
+                         "delete favorites" CBR OBR "about" CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_SAVE_FAVORITE: {
-            buf = astr(OBR "load set" CBR OBR
-                           "favorite sets" CBR OBR S_GREEN S_BOLD
-                           "new favorite set" S_END CBR OBR "about" CBR OBR
+            buf =
+                astr(OBR "load set" CBR OBR "favorites" CBR OBR S_GREEN S_BOLD
+                         "add favorite" S_END CBR OBR "delete favorites" CBR OBR
+                         "about" CBR OBR "exit" CBR);
+        } break;
+        case TUI_HOME_DELETE_FAVORITE: {
+            buf = astr(OBR "load set" CBR OBR "favorites" CBR OBR
+                           "add favorite" CBR OBR S_GREEN S_BOLD
+                           "delete favorites" S_END CBR OBR "about" CBR OBR
                            "exit" CBR);
         } break;
         case TUI_HOME_ABOUT: {
-            buf = astr(OBR "load set" CBR OBR "favorite sets" CBR OBR
-                           "new favorite set" CBR OBR S_GREEN S_BOLD
+            buf = astr(OBR "load set" CBR OBR "favorites" CBR OBR
+                           "add favorite" CBR OBR
+                           "delete favorites" CBR OBR S_GREEN S_BOLD
                            "about" S_END CBR OBR "exit" CBR);
         } break;
         case TUI_HOME_EXIT: {
-            buf = astr(OBR "load set" CBR OBR "favorite sets" CBR OBR
-                           "new favorite set" CBR OBR
+            buf = astr(OBR "load set" CBR OBR "favorites" CBR OBR
+                           "add favorite" CBR OBR "delete favorites" CBR OBR
                            "about" CBR OBR S_GREEN S_BOLD "exit" S_END CBR);
         } break;
     }
@@ -114,7 +122,7 @@ static TuiHomescreenCmd get_cmd(void) {
 }
 
 static bool handle_cmd(TuiHomescreen* s) {
-    const size_t MAX = 4;
+    const size_t MAX = 5;
     switch (s->cmd) {
         case TUI_CMD_RIGHT: {
             if (s->sel + 1 > MAX)

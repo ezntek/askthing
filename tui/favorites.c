@@ -24,7 +24,7 @@ static void draw_one_line(TuiFavorites* s, size_t idx, bool sel) {
     printf(S_CLEAR_LINE);
     if (idx == s->entries->len) {
         if (sel) {
-            printf("    " OBR S_BLUE S_BOLD "exit" S_END CBR);
+            printf("    " OBR S_RED S_BOLD "exit" S_END CBR);
         } else {
             printf("    " OBR "exit" CBR);
         }
@@ -42,11 +42,13 @@ static void draw_one_line(TuiFavorites* s, size_t idx, bool sel) {
     }
 
     if (sel) {
-        printf(S_DIM "%2zu: " S_END OBR S_BLUE S_BOLD "%s" S_END CBR S_DIM
-                     " (play?)" S_END,
-               idx, name_disp.data);
+        printf(S_DIM "%2zu: " S_END OBR S_BLUE S_BOLD "%s" S_END CBR, idx + 1,
+               name->data);
+        if (s->hint.len != 0) {
+            printf(S_DIM " (%s)" S_END, s->hint.data);
+        }
     } else {
-        printf(S_DIM "%2zu: " S_END OBR "%s" CBR, idx, name_disp.data);
+        printf(S_DIM "%2zu: " S_END OBR "%s" CBR, idx + 1, name_disp.data);
     }
 
     a_string_free(&name_disp);
@@ -131,8 +133,9 @@ static bool handle_cmd(TuiFavorites* s) {
     return false;
 }
 
-size_t tui_favorites(a_vector* v) {
-    TuiFavorites state = {.entries = v, .max_idx = (v->len <= 8) ? v->len : 8};
+size_t tui_favorites(a_vector* v, a_string hint) {
+    TuiFavorites state = {
+        .entries = v, .max_idx = (v->len <= 8) ? v->len : 8, .hint = hint};
 
     printf(S_HIDECURSOR);
 
@@ -149,6 +152,7 @@ size_t tui_favorites(a_vector* v) {
     } while (state.cmd != TUI_FAV_SEL);
 
     printf(S_SHOWCURSOR);
+    a_string_free(&hint);
 
     return state.sel_idx;
 }

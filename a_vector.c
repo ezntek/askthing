@@ -126,11 +126,14 @@ void* a_vector_pop_at(a_vector* v, size_t pos) {
         panic("array index %zu out of range", pos);
     }
 
-    void* res = v->data[pos--];
+    void* res = v->data[pos];
 
     size_t items =
         (v->len - pos + 1); // items between pos+1 and the end of the list
+
     memmove(&v->data[pos], &v->data[pos + 1], items * sizeof(void*));
+
+    v->len--;
 
     return res;
 }
