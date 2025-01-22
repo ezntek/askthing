@@ -49,9 +49,10 @@ struct state s;
 bool running;
 struct termios default_termios;
 
-static void ask_question(int argc, char** argv);
+static a_string get_question_filename_from_stdin(void);
+static void ask_question(a_string* filename);
 static void about(void);
-static void handle_exit(void);
+static void restore_terminal(void);
 static void setup(void);
 static a_string ensure_config_dir(void);
 static void load_favorites(void);
@@ -60,34 +61,32 @@ static void leave(void);
 static void view_favorites(void);
 static void save_favorite(void);
 
-static void ask_question(int argc, char** argv) {
+static a_string get_question_filename_from_stdin() {
     a_string filename;
-    if (argc >= 1) {
-        filename = astr(argv[0]);
-    } else {
-        printf(S_DIM "enter questions filename: " S_END);
-        fflush(stdout);
-        a_string rawfn = a_string_with_capacity(100);
-        fgets(rawfn.data, 100, stdin);
-        rawfn.len = strlen(rawfn.data);
-        if (rawfn.len == 1) {
-            warn("no file provided");
-            a_string_free(&rawfn);
-        }
-        filename = a_string_trim(&rawfn);
-        FILE* tmp = fopen(filename.data, "r");
-        if (tmp == NULL) {
-            warn("file does not exist");
-        } else {
-            fclose(tmp);
-        }
+    printf(S_DIM "enter questions filename: " S_END);
+    fflush(stdout);
+    a_string rawfn = a_string_with_capacity(100);
+    fgets(rawfn.data, 100, stdin);
+    rawfn.len = strlen(rawfn.data);
+    if (rawfn.len == 1) {
+        warn("no file provided");
         a_string_free(&rawfn);
     }
+    filename = a_string_trim(&rawfn);
+    FILE* tmp = fopen(filename.data, "r");
+    if (tmp == NULL) {
+        warn("file does not exist");
+    } else {
+        fclose(tmp);
+    }
+    a_string_free(&rawfn);
+    return filename;
+}
 
-    QuestionGroup g = questiongroup_new(filename.data);
+static void ask_question(a_string* filename) {
+    QuestionGroup g = questiongroup_new(filename->data);
     questiongroup_ask(&g);
     questiongroup_destroy(&g);
-    a_string_free(&filename);
 }
 
 static void about(void) { printf("version " VERSION "\n"); }
@@ -98,7 +97,7 @@ static void handle_ctrlc(int a) {
     exit(1);
 }
 
-static void handle_exit(void) {
+static void restore_terminal(void) {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &default_termios);
     printf(S_SHOWCURSOR);
 }
@@ -172,10 +171,12 @@ static void load_favorites(void) {
 static void view_favorites(void) {
     size_t index = tui_favorites(&s.favorites);
     a_string* fn = s.favorites.data[index];
+
+    restore_terminal();
     if (index == s.favorites.len) {
         info("left with exit");
     } else {
-        info("got `%s`", fn->data);
+        ask_question(fn);
     }
 }
 
@@ -216,7 +217,7 @@ static void setup(void) {
 
     tcgetattr(STDIN_FILENO, &default_termios);
     signal(SIGINT, handle_ctrlc);
-    atexit(handle_exit);
+    atexit(restore_terminal);
     printf(WELCOME);
 }
 
@@ -232,7 +233,7 @@ static void leave(void) {
         fclose(s.fav_fp);
     }
 
-    handle_exit();
+    restore_terminal();
     printf(S_BOLD "Bye\n" S_END);
     exit(EXIT_SUCCESS);
 }
@@ -251,7 +252,9 @@ int main(int argc, char** argv) {
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &default_termios);
         switch (a) {
             case TUI_HOME_LOAD_SET: {
-                ask_question(argc, argv);
+                a_string fn = get_question_filename_from_stdin();
+                ask_question(&fn);
+                a_string_free(&fn);
             } break;
             case TUI_HOME_LOAD_FAVORITE: {
                 view_favorites();
