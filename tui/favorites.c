@@ -9,12 +9,16 @@
  *
  */
 
+#define _GNU_SOURCE
+
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <termios.h>
 
 #include "../a_string.h"
 #include "../a_vector.h"
+#include "../util.h"
 #include "tui.h"
 
 #define OBR S_DIM " [" S_END
@@ -31,27 +35,19 @@ static void draw_one_line(TuiFavorites* s, size_t idx, bool sel) {
         return;
     }
 
-    a_string name_disp = a_string_with_capacity(20);
     a_string* name = (a_string*)s->entries->data[idx];
-
-    if (name->len > 20) {
-        a_string_ncopy(&name_disp, name, 17);
-        a_string_append_cstr(&name_disp, "...");
-    } else {
-        a_string_copy(&name_disp, name);
-    }
 
     if (sel) {
         printf(S_DIM "%2zu: " S_END OBR S_BLUE S_BOLD "%s" S_END CBR, idx + 1,
                name->data);
+
         if (s->hint.len != 0) {
             printf(S_DIM " (%s)" S_END, s->hint.data);
         }
     } else {
-        printf(S_DIM "%2zu: " S_END OBR "%s" CBR, idx + 1, name_disp.data);
+        char* base = basename(name->data);
+        printf(S_DIM "%2zu: " S_END OBR "%s" CBR, idx + 1, base);
     }
-
-    a_string_free(&name_disp);
 }
 
 static void draw_display(TuiFavorites* s) {

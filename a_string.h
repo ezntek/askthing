@@ -15,8 +15,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "util.h"
-
 /**
  * null terminated, heap-allocated string slice.
  */
@@ -246,3 +244,10 @@ bool a_string_equal(const a_string* lhs, const a_string* rhs);
  */
 
 bool a_string_equal_case_insensitive(const a_string* lhs, const a_string* rhs);
+
+/**
+ * `realpath` but for a_strings.
+ *
+ * @param s the string to canonicalize
+ */
+a_string a_string_realpath(const char* orig);

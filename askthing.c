@@ -46,8 +46,8 @@ struct state {
 };
 
 struct state s;
-bool running;
 struct termios default_termios;
+bool running;
 
 static a_string get_question_filename_from_stdin(void);
 static void ask_question(a_string* filename);
@@ -147,17 +147,20 @@ static void load_favorites(void) {
             panic("could not open favorites file for w+");
         }
     } else {
-        a_string line = a_string_with_capacity(200);
-        while (fgets(line.data, 200, s.fav_fp) != NULL) {
+        a_string line = a_string_with_capacity(300);
+        while (fgets(line.data, 300, s.fav_fp) != NULL) {
             line.len = strlen(line.data);
             a_string new = a_string_trim(&line);
 
             if (new.len == 0)
                 continue;
 
+            a_string resolved = a_string_realpath(new.data);
+            a_string_free(&new);
+
             a_string* heapstr = calloc(1, sizeof(a_string));
             check_alloc(heapstr);
-            *heapstr = new;
+            *heapstr = resolved;
             a_vector_append(&s.favorites, (void*)heapstr);
         }
 
@@ -188,8 +191,8 @@ static void del_favorites(void) {
 
     // extreme jank.
     a_string* deleted = a_vector_pop_at(&s.favorites, index); // the easy part
-    a_string_free(deleted);
-    free(deleted); // free the container too
+    a_string_free(deleted); // free the string buffer
+    free(deleted);          // free the container too
 
     // recalculate the path
     a_string cfg_dir = ensure_config_dir();
@@ -215,8 +218,9 @@ static void save_favorite(void) {
     fgets(rawfn.data, 100, stdin);
     rawfn.len = strlen(rawfn.data);
     if (rawfn.len == 1) {
-        fatal("no file provided");
+        warn("no file provided");
         a_string_free(&rawfn);
+        return;
     }
     a_string filename = a_string_trim(&rawfn);
     a_string_free(&rawfn);
@@ -226,14 +230,17 @@ static void save_favorite(void) {
     if (tmp != NULL) {
         fclose(tmp); // immediately close
 
+        a_string resolved = a_string_realpath(filename.data);
+        a_string_free(&filename);
+
         // push to file
-        fputs(filename.data, s.fav_fp);
+        fputs(resolved.data, s.fav_fp);
         fputs("\n", s.fav_fp);
 
         // push to buffer
         a_string* fnheap = calloc(1, sizeof(a_string));
         check_alloc(fnheap);
-        *fnheap = filename;
+        *fnheap = resolved;
         a_vector_append(&s.favorites, (void*)fnheap);
     } else {
         warn("file does not exist!");

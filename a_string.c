@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "a_string.h"
+#include "util.h"
 
 a_string a_string_new(void) {
     a_string res = {
@@ -275,4 +276,11 @@ bool a_string_equal_case_insensitive(const a_string* lhs, const a_string* rhs) {
     }
 
     return true;
+}
+
+a_string a_string_realpath(const char* orig) {
+    char* raw = realpath(orig, NULL);
+    a_string result = astr(raw);
+    free(raw);
+    return result;
 }
