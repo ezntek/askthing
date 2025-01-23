@@ -3,3 +3,5 @@ If:
 CompileFlags:
  Add: [-xc-header]
 
+CompileFlags:
+ Add: [-I./]

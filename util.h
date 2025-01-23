@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "settings.h"
+
 #define S_BOLD "\033[1m"
 #define S_DIM  "\033[2m"
 #define S_END  "\033[0m"
@@ -85,6 +87,7 @@
         eprintf(S_END "\n");                                                   \
     }
 
+#ifdef LOG_INFO
 #define info(...)                                                              \
     {                                                                          \
         eprintf(S_CYAN S_BOLD "[info] " S_END);                                \
@@ -92,3 +95,10 @@
         eprintf(__VA_ARGS__);                                                  \
         eprintf(S_END "\n");                                                   \
     }
+#else
+
+#define info(...)                                                              \
+    {                                                                          \
+    }
+
+#endif

@@ -11,6 +11,5 @@
 
 #pragma once
 
-typedef struct {
-
-} Config;
+// log information (comment to disable)
+// #define LOG_INFO

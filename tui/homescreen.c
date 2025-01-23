@@ -14,6 +14,7 @@
 #include <termios.h>
 
 #include "../a_string.h"
+#include "../util.h"
 #include "tui.h"
 
 #define OBR S_DIM " [" S_END

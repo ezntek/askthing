@@ -9,4 +9,7 @@
  *
  */
 
-#include "config.h"
+#pragma once
+
+// log information (comment to disable)
+#define LOG_INFO
