@@ -21,6 +21,10 @@
 #include "../util.h"
 #include "tui.h"
 
+#ifndef basename
+#include <libgen.h>
+#endif
+
 #define OBR S_DIM " [" S_END
 #define CBR S_DIM "]" S_END
 
