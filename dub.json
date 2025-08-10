@@ -3,6 +3,9 @@
 		"ezntek"
 	],
 	"copyright": "Copyright © 2025, ezntek",
+	"dependencies": {
+		"argparse": "~>1.4.1"
+	},
 	"description": "A scuffed question-and-answer engine.",
 	"license": "MPL-2.0",
 	"name": "askthing"

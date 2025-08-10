@@ -2,76 +2,44 @@ import std.stdio;
 import std.string;
 import std.ascii : toLower, toUpper;
 import std.conv;
-    
-class InvalidFormatException : Exception {
-    this(string msg) {
-        super(msg);
-    }
-}
+import question;
+import std.process;
 
-class Question {
-    string prompt;
-    string[] answers;
-    int reward;
-    bool caseSensitive;
+import core.stdc.stdlib : exit;
+import core.sys.posix.termios;
+import core.sys.posix.unistd;
+import argparse;
+import tui;
 
-    // Throws: InvalidFormatException
-    this(string line) {
-        string[] splitLine = line.split(";");
-        if (splitLine.length > 4) {
-            throw new InvalidFormatException("Too many fields in Question line!");
-        }
+immutable VERSION = "0.2.0";
+termios origTermios = {};
 
-        this.prompt = splitLine[0].strip();
-        this.answers = [];
-        foreach (itm; splitLine[1].strip().split(",")) {
-            // dynamic array appends are scuffed
-            this.answers[this.answers.length++] = itm.strip;
-        }
-
-        try {
-            this.reward = splitLine[2].strip().to!int(); 
-        } catch (ConvException e) {
-            throw new InvalidFormatException("Invalid field for reward: %s".format(e));
-        }
-        
-        this.caseSensitive = false;
-        if (splitLine.length == 4) {
-            char c = splitLine[3].strip()[0].toLower();
-            switch (c) {
-                case 'y': {
-                    this.caseSensitive = true;
-                } break;
-                case 'n': {
-                    this.caseSensitive = false;
-                } break;
-                default:
-                    throw new InvalidFormatException(
-                        "Last field's case sensitivity specifier `%c` is invalid".format(c));
-            }
-        }
-    }
-    
-    void ask() {
-        writefln("question: \"%s\"", prompt);
-        foreach (answer; answers) {
-            writefln("ans: \"%s\"", answer);
-        }
-        writefln("reward: \"%s\"", reward);
-        if (caseSensitive) {
-            writeln("case sensitive");
-        } 
-    }
-}
-
-void main(string[] args) {
+struct Args {
+    @PositionalArgument(0)
     string path;
-    if (args.length <= 1) {
-        write("enter file path: ");
-        path = readln().strip();
-    } else {
-        path = args[1].strip();
+
+    @NamedArgument("v", "version")
+    void _version() {
+        writeln("askthing version ", VERSION);
+        exit(0);
     }
+}
+
+void init() {
+    tcgetattr(STDIN_FILENO, &origTermios);
+}
+
+void deinit() {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &origTermios);
+}
+
+int main(string[] argv) {
+    // manually calling parseargs because this main is good enough
+    Args args;
+    if (!CLI!Args.parseArgs(args, argv[1..$]))
+        return 1;
+
+    string path = args.path;
 
     File f = File(path, "r");
     scope(exit) f.close();
@@ -95,4 +63,6 @@ void main(string[] args) {
     foreach (q; qns) {
         q.ask();
     }
+    
+    return 0;
 }
