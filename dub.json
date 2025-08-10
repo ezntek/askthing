@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"ezntek"
+	],
+	"copyright": "Copyright © 2025, ezntek",
+	"description": "A scuffed question-and-answer engine.",
+	"license": "MPL-2.0",
+	"name": "askthing"
+}
