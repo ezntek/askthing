@@ -3,6 +3,7 @@ import std.format;
 import std.conv;
 import std.typecons : Nullable;
 import std.sumtype;
+import std.algorithm.searching;
 
 import core.sys.posix.termios;
 import core.sys.posix.unistd;
@@ -50,10 +51,11 @@ enum Command {
     LEFT,
     RIGHT,
     SELECT,
+    NONE,
 }
 
-private int getColorLength() {
-    return Color.max+1 - Color.min;
+private int getEnumLength(E)() if (is(E == enum)) {
+    return E.max+1 - E.min;
 }
 
 private string getColorEscapeCode(Color c, bool bold = false) {
@@ -72,24 +74,28 @@ class HorizontalMenu(E) if (is(E == enum)) {
     private Color activeColor;
     string[] opts;
 
-    import tui.Color;
     immutable OBR = S_DIM ~ "[" ~ S_END;
     immutable CBR = S_DIM ~ "]" ~ S_END;
 
-    this(string[] opts, Color activeColor = GREEN) {
-        static assert(getColorLength() == opts.length, "length of enum must match length of options!");
+    this(string[] opts, Color activeColor = Color.GREEN) {
+        assert(getEnumLength!E() == opts.length, "length of enum must match length of options!");
 
-        this.activeColor = color;
+        this.activeColor = activeColor;
         this.opts = opts;
         this.cur = cast(E)0;
     }
 
-    private void getVariantString(Color c) {
+    private string getVariantString(Color c) {
         return opts[cast(int)c];
     }
 
-    private string formatOneOption(String str) {
-        return "%s%s%s%s%s".format(OBR, color.getColorEscapeCode(true), str, S_END, CBR);
+    private string formatOneOption(string str) {
+        string cur_s = opts[cast(int)cur];
+        if (str == cur_s) {
+            return OBR ~ activeColor.getColorEscapeCode(true) ~ str ~ S_END ~ CBR;
+        } else {
+            return OBR ~ str ~ CBR;
+        }
     }
 
     void draw(File stream = stdout()) {
@@ -97,16 +103,12 @@ class HorizontalMenu(E) if (is(E == enum)) {
             stream.write(formatOneOption(opt));
             stream.write(" ");
         }
-        stream.flush();
     }
 
-    Key getNextCommand() {
-        toggleRawMode();
-        scope(exit) toggleRawMode();
-
-        char ch = cast(char)getchar();
-        if (ch == '\033') {
-            switch (getchar()) {
+    Command getNextCommand() {
+        char ch = rgetchar();
+        if (ch == '[') {
+            switch (rgetchar()) {
                 case 'B': {
                     return Command.SELECT;
                 } break;
@@ -116,7 +118,7 @@ class HorizontalMenu(E) if (is(E == enum)) {
                 case 'D': {
                     return Command.LEFT;
                 } break;
-                default: return '\033';
+                default: return Command.NONE;
             }
         }
 
@@ -124,46 +126,49 @@ class HorizontalMenu(E) if (is(E == enum)) {
             case '\n': {
                 return Command.SELECT;
             } break;
-            default: return ch;
+            default: return Command.NONE;
         }
     }
 
     // returns true if handled
     private void handleCommand(Command cmd) {
-        immutable int MAX = E.max + 1 - E.min;
+        immutable int MAX = getEnumLength!E;
         switch (cmd) {
-            case RIGHT: {
-                cur = cast(E)((cast(int)cur + 1) % MAX);
+            case Command.RIGHT: {
+                cur = cast(E)((cast(uint)cur + 1) % MAX);
             } break; 
-            case LEFT: {
-                cur = cast(E)((cast(int)cur - 1) % MAX);
+            case Command.LEFT: {
+                cur = cast(E)((cast(uint)cur - 1) % MAX);
             } break;
             default: break;
         }
     }
 
-    private void handleKey(Key k) {
-        return k.match!(
-            (char _) => false, // no-op for now
-            handleCommand,    
-        );    
-    }
-
     E run(File stream = stdout()) {
         stream.write(S_HIDE_CURSOR);
-        Key key = Key.init;
+        scope(exit) stream.write(S_SHOW_CURSOR);
 
+        auto cmd = Command.init;
         do {
             draw(stream);
-            key = getNextCommand();
-            if (key == Command.SELECT)
+            cmd = getNextCommand();
+
+            if (cmd == Command.SELECT)
                 break;
-            handleKey(k);
+            
+            handleCommand(cmd);
+            stream.write("\r");
         } while (true);
 
-        stream.write(S_SHOW_CURSOR);
         return cur;
     }
+}
+
+private char rgetchar() {
+    toggleRawMode();
+    char ch = cast(char)getchar();
+    toggleRawMode();
+    return ch;
 }
 
 void toggleRawMode() {

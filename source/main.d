@@ -33,7 +33,18 @@ void deinit() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &origTermios);
 }
 
+enum Options {
+    FOO,
+    BAR,
+    BAZ
+}
+
 int main(string[] argv) {
+    auto m = new HorizontalMenu!Options(["foo", "bar", "baz"]);
+    Options status = m.run();
+    writefln("%s", status);
+    return 0;
+
     // manually calling parseargs because this main is good enough
     Args args;
     if (!CLI!Args.parseArgs(args, argv[1..$]))
