@@ -1,7 +1,7 @@
 import std.stdio;
 import std.format;
 import std.conv;
-import std.typecons : Nullable;
+import std.typecons;
 import std.sumtype;
 import std.algorithm.searching;
 
@@ -70,37 +70,69 @@ alias EscapedChar = char;
 alias Key = SumType!(Command, char);
 
 class HorizontalMenu(E) if (is(E == enum)) {
-    private E cur;
+    private int cur;
     private Color activeColor;
     string[] opts;
+    bool showExit;
 
     immutable OBR = S_DIM ~ "[" ~ S_END;
     immutable CBR = S_DIM ~ "]" ~ S_END;
 
-    this(string[] opts, Color activeColor = Color.GREEN) {
+    this(string[] opts, bool showExit = true, Color activeColor = Color.GREEN) {
         assert(getEnumLength!E() == opts.length, "length of enum must match length of options!");
 
         this.activeColor = activeColor;
         this.opts = opts;
-        this.cur = cast(E)0;
+        this.cur = 0;
+        this.showExit = showExit;
+    }
+    
+    private E getCurEnum() {
+        return cast(E)cur;
     }
 
     private string getVariantString(Color c) {
         return opts[cast(int)c];
     }
 
-    private string formatOneOption(string str) {
-        string cur_s = opts[cast(int)cur];
+    private string formatExit() {
+        if (!showExit) {
+            return "";
+        }
+
+        if (cur == opts.length) {
+            return OBR ~ getColorEscapeCode(Color.RED, true) ~ "exit" ~ S_END ~ CBR;
+        } else {
+            return OBR ~ "exit" ~ CBR;
+        }
+    }
+
+    private string formatOneOption(int i) {
+        if (i == opts.length && showExit)
+            return formatExit();
+
+        string str = opts[i];
+        string cur_s = "";
+
+        if (cur == opts.length && showExit) {
+        } else {
+            cur_s = opts[cur];
+        }
+
         if (str == cur_s) {
             return OBR ~ activeColor.getColorEscapeCode(true) ~ str ~ S_END ~ CBR;
-        } else {
+        } else  {
             return OBR ~ str ~ CBR;
         }
     }
 
     void draw(File stream = stdout()) {
-        foreach (opt; opts) {
-            stream.write(formatOneOption(opt));
+        auto max = opts.length;
+        if (showExit)
+            max++;
+
+        for (auto i = 0; i < max; i++) {
+            stream.write(formatOneOption(i));
             stream.write(" ");
         }
     }
@@ -132,19 +164,24 @@ class HorizontalMenu(E) if (is(E == enum)) {
 
     // returns true if handled
     private void handleCommand(Command cmd) {
-        immutable int MAX = getEnumLength!E;
+        int max = getEnumLength!E;
+        if (showExit)
+            max++;
+
         switch (cmd) {
             case Command.RIGHT: {
-                cur = cast(E)((cast(uint)cur + 1) % MAX);
+                cur = (cur + 1) % max;
             } break; 
             case Command.LEFT: {
-                cur = cast(E)((cast(uint)cur - 1) % MAX);
+                // force modulus to be always positive
+                int newval = cur - 1;
+                cur = (newval % max + max) % max;
             } break;
             default: break;
         }
     }
 
-    E run(File stream = stdout()) {
+    Nullable!E run(File stream = stdout()) {
         stream.write(S_HIDE_CURSOR);
         scope(exit) stream.write(S_SHOW_CURSOR);
 
@@ -160,7 +197,10 @@ class HorizontalMenu(E) if (is(E == enum)) {
             stream.write("\r");
         } while (true);
 
-        return cur;
+        if (cur < opts.length)
+            return getCurEnum();
+        else
+            return Nullable!E.init;
     }
 }
 

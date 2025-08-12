@@ -34,13 +34,15 @@ void deinit() {
 }
 
 enum Options {
-    FOO,
-    BAR,
-    BAZ
+    FAVORITES,
+    LOAD_FILE,
+    MANAGE_FAVORITES,
+    VERSION,
+    LICENSE,
 }
 
 int main(string[] argv) {
-    auto m = new HorizontalMenu!Options(["foo", "bar", "baz"]);
+    auto m = new HorizontalMenu!Options(["favorites", "load file", "manage favorites", "version", "license"]);
     Options status = m.run();
     writefln("%s", status);
     return 0;
